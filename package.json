@@ -1,0 +1,27 @@
+{
+  "name": "tranzy",
+  "version": "1.0.0",
+  "description": "网页自动翻译插件",
+  "type": "module",
+  "main": "dist/tranzy.umd.js",
+  "module": "dist/tranzy.es.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
+  },
+  "keywords": [
+    "translate",
+    "translation",
+    "i18n",
+    "internationalization"
+  ],
+  "author": "Tranzy",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.9.6"
+  }
+} 
