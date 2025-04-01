@@ -18,8 +18,16 @@
     "i18n",
     "internationalization"
   ],
-  "author": "Tranzy",
+  "author": "Fts Cloud <ftsuperb@vip.qq.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FtsCloud/Tranzy"
+  },
+  "homepage": "https://github.com/FtsCloud/Tranzy",
+  "bugs": {
+    "url": "https://github.com/FtsCloud/Tranzy/issues"
+  },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "rollup": "^4.9.6"

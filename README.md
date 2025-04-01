@@ -223,3 +223,13 @@ Tranzy 依赖于这些现代浏览器功能：
 ## 许可证
 
 MIT
+
+## 作者
+
+- **Fts Cloud** - [GitHub](https://github.com/FtsCloud)
+- **Email**: ftsuperb@vip.qq.com
+- **仓库**: https://github.com/FtsCloud/Tranzy
+
+## 版权声明
+
+Copyright (c) 2023-present Fts Cloud

@@ -4,8 +4,10 @@
  * 使用微软翻译API实现多语言翻译
  * 同时支持ESM和浏览器直接使用
  *
- * @author Tranzy
+ * @author Fts Cloud <ftsuperb@vip.qq.com>
  * @license MIT
+ * @repository https://github.com/FtsCloud/Tranzy
+ * @copyright Copyright (c) 2023-present Fts Cloud
  */
 
 // 默认忽略的选择器列表，这些元素及其内容不会被翻译
