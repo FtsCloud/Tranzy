@@ -1037,7 +1037,6 @@ class Tranzy {
     if (textsToFetch.length > 0) {
       try {
         const apiResults = await this.config.translatorFn(textsToFetch, this.config.toLang, this.config.fromLang);
-        console.log('apiResults', apiResults);
 
         // 更新缓存
         await this.cache.setBatch(textsToFetch, apiResults, this.config.toLang, this.config.fromLang);
