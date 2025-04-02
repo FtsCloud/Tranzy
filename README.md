@@ -124,24 +124,105 @@ tranzy.destroy();
 const tranzy = new Tranzy({
   toLang: 'zh-Hans',
   manualDict: {
+    // 全局词典，适用于所有目标语言
+    'all': {
+      // 品牌名称、专有名词等不需要翻译的词汇
+      'tranzy': {         // 注意：case: false 时关键词必须小写
+        to: 'Tranzy',        // 保持原样或指定固定翻译
+        standalone: false,   // false表示在句子中也匹配
+        case: false          // false表示忽略大小写
+      },
+      // 简化形式，默认 standalone: true, case: true
+      'Copyright': 'Copyright'
+    },
+    // 特定语言的词典
     'zh-Hans': {
       // 完整形式
       'Hello World': {
-        to: '你好，世界',
-        standalone: true,  // 仅当独立出现时才翻译
-        case: true        // 区分大小写
+        to: '你好，世界',    
+        standalone: true,    // true表示只有当文本完全等于"Hello World"时才替换
+        case: true           // true表示区分大小写，必须完全匹配
       },
-      // 简化形式
+      // 简化形式（默认 standalone: true, case: true）
       'JavaScript': 'JavaScript (JS脚本语言)',
-      // 支持正则表达式
+      // 支持正则表达式形式的匹配
       '\\d+ years old': {
         to: '岁',
-        standalone: true
+        standalone: true     // 仅匹配独立的文本
       }
     }
   }
 });
 ```
+
+#### 手动词典详细说明
+
+1. **全局词典配置 `all`**
+   - 目的：保持品牌名称、专有名词等在所有语言中的一致性
+   - 优先级：`all` 配置的优先级高于语言特定配置
+   - 适用场景：
+     - 品牌名称保持不变（如 "Tranzy"）
+     - 通用术语保持固定翻译（如 "API", "HTML", "CSS" 等）
+     - 产品名称在所有语言中统一显示
+
+2. **独立匹配 `standalone`**
+   - `true`（默认值）：仅当文本完全等于词典中的关键词时才进行替换
+     - 例：词典中有 "book"，只有文本完全等于 "book" 时才会被替换，"notebook" 中的 "book" 不会被替换
+   - `false`：在文本中出现词典关键词时也进行替换
+     - 例：词典中有 "book"，"notebook" 中的 "book" 也会被替换
+     - 适用于需要保持特定术语一致性的场景
+
+3. **大小写敏感 `case`**
+   - `true`（默认值）：区分大小写匹配
+     - 例：词典中有 "JavaScript"，只有大小写完全匹配时才会被替换
+   - `false`：忽略大小写匹配
+     - 例：词典中有 "javascript"（必须小写），可以匹配 "JavaScript"、"JAVASCRIPT" 等
+     - **重要**：当 `case: false` 时，词典中的关键词必须全部小写
+
+4. **使用场景示例**
+
+   a. 保护品牌名称（全局配置）：
+   ```javascript
+   'all': {
+     'tranzy': {        // 注意：case: false 时关键词必须小写
+       to: 'Tranzy',
+       standalone: false, // 在句子中也保护
+       case: false      // 忽略大小写
+     }
+   }
+   ```
+
+   b. 专业术语统一翻译（语言特定）：
+   ```javascript
+   'zh-Hans': {
+     'neural network': {
+       to: '神经网络',
+       standalone: false, // 在句子中也替换
+       case: false      // 忽略大小写
+     }
+   }
+   ```
+
+   c. 完整句子或段落替换：
+   ```javascript
+   'zh-Hans': {
+     'Terms and Conditions': {
+       to: '条款和条件',
+       standalone: true,  // 仅替换完整匹配
+       case: true        // 区分大小写
+     }
+   }
+   ```
+
+   d. 数字格式处理：
+   ```javascript
+   'zh-Hans': {
+     '\\d+ pieces': {
+       to: '个',
+       standalone: false  // 在句子中替换
+     }
+   }
+   ```
 
 ### 4. 控制翻译范围
 
@@ -274,6 +355,8 @@ const tranzy = new Tranzy({
 
 ##### destroy()
 - 无参数
+- 销毁实例，停止观察器，清空待处理元素，关闭数据库连接
+- 返回当前实例，支持链式调用
 
 ## 作者
 

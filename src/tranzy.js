@@ -1,18 +1,18 @@
 /**
  * Tranzy - 网页自动翻译插件
- * 
+ *
  * 主要功能：
  * 1. 自动检测DOM变化并翻译新增内容
  * 2. 支持批量翻译和缓存机制
  * 3. 提供灵活的配置选项和钩子函数
  * 4. 支持手动翻译词典和术语处理
  * 5. 内置微软翻译API实现
- * 
+ *
  * 使用方式：
  * 1. 直接使用翻译功能：
  *    import { translateText } from 'tranzy';
  *    const result = await translateText(['Hello'], 'zh', 'en');
- * 
+ *
  * 2. 使用页面翻译功能：
  *    import Tranzy from 'tranzy';
  *    const tranzy = new Tranzy({
@@ -20,7 +20,7 @@
  *      fromLang: 'en'
  *    });
  *    await tranzy.translatePage();
- * 
+ *
  * @author Fts Cloud <ftsuperb@vip.qq.com>
  * @license MIT
  * @repository https://github.com/FtsCloud/Tranzy
@@ -95,7 +95,7 @@ class TranslationCache {
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
         if (!db.objectStoreNames.contains(this.storeName)) {
-          const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
+          db.createObjectStore(this.storeName, {keyPath: 'id'});
         }
       };
 
@@ -178,33 +178,6 @@ class TranslationCache {
   }
 
   /**
-   * 批量获取缓存的翻译结果
-   * @param {string[]} texts - 原文数组
-   * @param {string} toLang - 目标语言
-   * @param {string} [fromLang=''] - 源语言
-   * @returns {Promise<{results: Array<string|null>, remainingIndices: number[]}>} - 缓存结果和未缓存的索引
-   */
-  async getBatch(texts, toLang, fromLang = '') {
-    await this.initPromise;
-    const results = Array(texts.length).fill(null);
-    const remainingIndices = [];
-
-    await Promise.all(texts.map(async (text, index) => {
-      const cachedTranslation = await this.get(text, toLang, fromLang);
-      if (cachedTranslation) {
-        results[index] = cachedTranslation;
-      } else {
-        remainingIndices.push(index);
-      }
-    }));
-
-    return {
-      results,
-      remainingIndices
-    };
-  }
-
-  /**
    * 批量设置翻译结果到缓存
    * @param {string[]} texts - 原文数组
    * @param {string[]} translations - 翻译结果数组
@@ -228,21 +201,29 @@ function loadTokenFromSession() {
   try {
     const tokenData = sessionStorage.getItem('tranzy_auth_token');
     if (tokenData) {
-      const { token, timestamp } = JSON.parse(tokenData);
+      const {
+        token,
+        timestamp
+      } = JSON.parse(tokenData);
       const now = Date.now();
       // 如果token未过期，则使用缓存的token
       if (token && (now - timestamp) < 10 * 60 * 1000) {
-        return { token, timestamp };
-      } else {
-        // token已过期，清除缓存
-        clearTokenFromSession();
+        return {
+          token,
+          timestamp
+        };
       }
+      // token已过期，清除缓存
+      clearTokenFromSession();
     }
   } catch (error) {
     console.error('Tranzy: Failed to load token from session / 从session加载token失败', error);
     clearTokenFromSession();
   }
-  return { token: null, timestamp: 0 };
+  return {
+    token: null,
+    timestamp: 0
+  };
 }
 
 /**
@@ -252,7 +233,10 @@ function loadTokenFromSession() {
  */
 function saveTokenToSession(token, timestamp) {
   try {
-    sessionStorage.setItem('tranzy_auth_token', JSON.stringify({ token, timestamp }));
+    sessionStorage.setItem('tranzy_auth_token', JSON.stringify({
+      token,
+      timestamp
+    }));
   } catch (error) {
     console.error('Tranzy: Failed to save token to session / 保存token到session失败', error);
   }
@@ -276,7 +260,10 @@ function clearTokenFromSession() {
  */
 async function getAuthToken() {
   const now = Date.now();
-  const { token, timestamp } = loadTokenFromSession();
+  const {
+    token,
+    timestamp
+  } = loadTokenFromSession();
 
   // 如果token获取时间小于10分钟，则直接返回
   if (token && (now - timestamp) < 10 * 60 * 1000) {
@@ -292,7 +279,8 @@ async function getAuthToken() {
     });
 
     if (!response.ok) {
-      throw new Error(`Tranzy: Failed to get Microsoft Translator authorization / 获取微软翻译授权失败: ${response.status} ${response.statusText}`);
+      console.error(`Tranzy: Failed to get Microsoft Translator authorization / 获取微软翻译授权失败: ${response.status} ${response.statusText}`);
+      return null;
     }
 
     const newToken = await response.text();
@@ -316,7 +304,7 @@ async function getAuthToken() {
 export async function translateText(texts, toLang = navigator.language, fromLang = '') {
   try {
     // 过滤掉空文本和null值
-    const filteredTexts = texts.filter(text => text && text.trim());
+    const filteredTexts = texts.filter(text => text?.trim());
 
     // 如果没有有效文本需要翻译，直接返回空数组
     if (filteredTexts.length === 0) {
@@ -330,7 +318,7 @@ export async function translateText(texts, toLang = navigator.language, fromLang
     const url = `https://api.cognitive.microsofttranslator.com/translate?${fromLang ? `from=${fromLang}&` : ''}to=${toLang}&api-version=3.0`
 
     // 构建请求数据
-    const data = filteredTexts.map(text => ({ Text: text }));
+    const data = filteredTexts.map(text => ({Text: text}));
 
     // 发送请求
     const response = await fetch(url, {
@@ -343,7 +331,8 @@ export async function translateText(texts, toLang = navigator.language, fromLang
     });
 
     if (!response.ok) {
-      throw new Error(`Tranzy: Translation request failed / 翻译请求失败: ${response.status} ${response.statusText}`);
+      console.error(`Tranzy: Translation request failed / 翻译请求失败: ${response.status} ${response.statusText}`);
+      return texts; // 返回原文
     }
 
     // 处理响应
@@ -366,7 +355,7 @@ export async function detectLang(texts) {
     const textArray = Array.isArray(texts) ? texts : [texts];
 
     // 过滤掉空文本和null值
-    const filteredTexts = textArray.filter(text => text && text.trim());
+    const filteredTexts = textArray.filter(text => text?.trim());
 
     // 如果没有有效文本需要检测，直接返回空数组
     if (filteredTexts.length === 0) {
@@ -377,7 +366,7 @@ export async function detectLang(texts) {
     const token = await getAuthToken();
 
     // 构建请求数据
-    const data = filteredTexts.map(text => ({ Text: text }));
+    const data = filteredTexts.map(text => ({Text: text}));
 
     // 发送请求
     const response = await fetch('https://api.cognitive.microsofttranslator.com/detect?api-version=3.0', {
@@ -390,7 +379,8 @@ export async function detectLang(texts) {
     });
 
     if (!response.ok) {
-      throw new Error(`Tranzy: Language detection request failed / 语言检测请求失败: ${response.status} ${response.statusText}`);
+      console.error(`Tranzy: Language detection request failed / 语言检测请求失败: ${response.status} ${response.statusText}`);
+      return []; // 返回空数组
     }
 
     // 处理响应
@@ -426,7 +416,8 @@ export async function getSupportedLangs(displayLang = '') {
     });
 
     if (!response.ok) {
-      throw new Error(`Tranzy: Failed to get supported languages / 获取支持语种列表失败: ${response.status} ${response.statusText}`);
+      console.error(`Tranzy: Failed to get supported languages / 获取支持语种列表失败: ${response.status} ${response.statusText}`);
+      return {}; // 返回空对象
     }
 
     // 处理响应，只返回translation部分
@@ -458,11 +449,12 @@ export async function getBrowserLang() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify([{ Text: '' }])
+      body: JSON.stringify([{Text: ''}])
     });
 
     if (!response.ok) {
-      throw new Error(`Tranzy: Failed to get browser language / 获取浏览器语言失败: ${response.status} ${response.statusText}`);
+      console.error(`Tranzy: Failed to get browser language / 获取浏览器语言失败: ${response.status} ${response.statusText}`);
+      return navigator.language || 'en'; // 返回浏览器语言或默认英语
     }
 
     // 处理响应，获取支持的语言代码
@@ -495,31 +487,36 @@ class Tranzy {
    * @param {Function} [config.afterTranslate=null] - 翻译结束后的钩子
    */
   constructor(config = {}) {
-    // 合并默认配置与用户配置
-    this.config = Object.assign({}, DEFAULT_CONFIG, config);
+    this.config = {...DEFAULT_CONFIG, ...config};
+
+    // 合并 all 配置到当前语言的配置中，all 的优先级更高
+    this.config.manualDict[this.config.toLang] = {
+      ...this.config.manualDict[this.config.toLang] || {}, ...this.config.manualDict.all || {}
+    };
 
     // 标准化manualDict配置
-    if (this.config.manualDict) {
-      Object.keys(this.config.manualDict).forEach(lang => {
-        const langDict = this.config.manualDict[lang];
-        Object.keys(langDict).forEach(term => {
-          // 如果翻译值是字符串，转换为标准格式
-          if (typeof langDict[term] === 'string') {
-            langDict[term] = {
-              to: langDict[term],
-              standalone: true,
-              case: true
-            };
-          }
-        });
-      });
+    const langDict = this.config.manualDict[this.config.toLang];
+    for (const term of Object.keys(langDict)) {
+      // 如果翻译值是字符串，转换为标准格式
+      if (typeof langDict[term] === 'string') {
+        langDict[term] = {
+          to: langDict[term],
+          standalone: true,
+          case: true
+        };
+      }
     }
 
+    this.observer = null;
+    this.translationCache = new TranslationCache();
+
     // 合并并去重忽略选择器
-    this.config.ignore = [...new Set([
-      ...DEFAULT_IGNORE_SELECTORS,
-      ...(this.config.ignore || [])
-    ])];
+    this.config.ignore = [
+      ...new Set([
+        ...DEFAULT_IGNORE_SELECTORS,
+        ...(this.config.ignore || [])
+      ])
+    ];
 
     // 确保强制翻译选择器是数组
     this.config.force = this.config.force || [];
@@ -528,13 +525,9 @@ class Tranzy {
     this.forceSelectorString = this.config.force.length ? this.config.force.join(',') : '';
     this.ignoreSelectorString = this.config.ignore.length ? this.config.ignore.join(',') : '';
 
-    // 初始化缓存
-    this.cache = new TranslationCache();
-
     // 初始化状态
     this.isTranslating = false;         // 是否正在翻译
     this.pendingElements = new Set();   // 待翻译元素集合
-    this.observer = null;               // DOM观察器实例
     this.observerConfig = {             // 观察器配置
       childList: true,                  // 观察子节点变化
       subtree: true,                    // 观察后代节点变化
@@ -614,23 +607,20 @@ class Tranzy {
       for (const mutation of mutations) {
         // 处理新增节点
         if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          mutation.addedNodes.forEach(node => {
+          for (const node of mutation.addedNodes) {
             if (node.nodeType === Node.ELEMENT_NODE) {
               // 使用TreeWalker遍历所有元素节点
-              const treeWalker = document.createTreeWalker(
-                node,
-                NodeFilter.SHOW_ELEMENT,
-                this._createNodeFilter()
-              );
+              const treeWalker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, this._createNodeFilter());
 
               // 收集所有符合条件的元素
-              let currentNode;
-              while (currentNode = treeWalker.nextNode()) {
+              let currentNode = treeWalker.nextNode();
+              while (currentNode) {
                 this.pendingElements.add(currentNode);
                 shouldTranslate = true;
+                currentNode = treeWalker.nextNode();
               }
             }
-          });
+          }
         }
 
         // 处理文本变化
@@ -647,13 +637,14 @@ class Tranzy {
             let parent = node;
 
             while (parent) {
-              if (this.ignoreSelectorString && parent.matches(this.ignoreSelectorString) &&
-                !(this.forceSelectorString && parent.matches(this.forceSelectorString))) {
+              if (this.ignoreSelectorString && parent.matches(this.ignoreSelectorString) && !(this.forceSelectorString && parent.matches(this.forceSelectorString))) {
                 shouldSkip = true;
                 break;
               }
               parent = parent.parentNode;
-              if (!parent || parent === document) break;
+              if (!parent || parent === document) {
+                break;
+              }
             }
 
             if (!shouldSkip) {
@@ -728,7 +719,7 @@ class Tranzy {
    */
   async translatePage(root = 'body') {
     if (this.isTranslating) {
-      return;
+      return this;
     }
 
     this.isTranslating = true;
@@ -750,16 +741,13 @@ class Tranzy {
       const rootElement = document.querySelector(root);
 
       // 创建TreeWalker，只显示元素节点
-      const treeWalker = document.createTreeWalker(
-        rootElement,
-        NodeFilter.SHOW_ELEMENT,
-        this._createNodeFilter()
-      );
+      const treeWalker = document.createTreeWalker(rootElement, NodeFilter.SHOW_ELEMENT, this._createNodeFilter());
 
       // 收集所有符合条件的元素
-      let node;
-      while (node = treeWalker.nextNode()) {
+      let node = treeWalker.nextNode();
+      while (node) {
         elements.push(node);
+        node = treeWalker.nextNode();
       }
 
       await this._translateElements(elements);
@@ -821,7 +809,9 @@ class Tranzy {
    */
   _splitByTerms(text) {
     const toLangDict = this.config.manualDict[this.config.toLang];
-    if (!toLangDict) return [text];
+    if (!toLangDict) {
+      return [text];
+    }
 
     // 按长度降序排序术语，优先匹配最长的术语
     const terms = Object.keys(toLangDict).sort((a, b) => b.length - a.length);
@@ -830,8 +820,7 @@ class Tranzy {
     for (const term of terms) {
       const translation = toLangDict[term];
       // 如果是独立匹配模式（默认为true）且文本完全等于术语
-      if ((translation.standalone !== false) &&
-        (translation.case === false ? text.toLowerCase() === term.toLowerCase() : text === term)) {
+      if ((translation.standalone !== false) && (translation.case === false ? text.toLowerCase() === term.toLowerCase() : text === term)) {
         return [text];
       }
     }
@@ -840,9 +829,7 @@ class Tranzy {
     let containsAnyTerm = false;
     for (const term of terms) {
       const translation = toLangDict[term];
-      if (translation.case === false ?
-        text.toLowerCase().includes(term.toLowerCase()) :
-        text.includes(term)) {
+      if (translation.case === false ? text.toLowerCase().includes(term.toLowerCase()) : text.includes(term)) {
         containsAnyTerm = true;
         break;
       }
@@ -895,6 +882,41 @@ class Tranzy {
   }
 
   /**
+   * 获取元素的直接文本节点
+   * @param {Element} element - 需要获取文本节点的元素
+   * @returns {Array<{node: Text, text: string, leadingSpaces: string, trailingSpaces: string}>} - 文本节点信息数组
+   * @private
+   */
+  _getDirectTextNodes(element) {
+    const textNodes = [];
+    const treeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        if (node.parentNode !== element) {
+          return NodeFilter.FILTER_SKIP;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
+    let node = treeWalker.nextNode();
+    while (node) {
+      const text = node.textContent;
+      const trimmed = text.trim();
+      if (trimmed) {
+        textNodes.push({
+          node,
+          text: trimmed,
+          leadingSpaces: text.match(/^\s*/)[0],
+          trailingSpaces: text.match(/\s*$/)[0]
+        });
+      }
+      node = treeWalker.nextNode();
+    }
+
+    return textNodes;
+  }
+
+  /**
    * 批量翻译元素
    * @param {Element[]} elements - 需要翻译的元素数组
    * @param {string[]} textsArray - 对应的文本数组
@@ -903,7 +925,7 @@ class Tranzy {
   async _translateElementBatch(elements, textsArray) {
     // 收集需要翻译的文本和对应的元素
     const elementsWithText = [];
-    let textsToTranslate = [];
+    const textsToTranslate = [];
 
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
@@ -930,35 +952,7 @@ class Tranzy {
       // 如果元素包含子元素，需要单独处理每个文本节点
       if (element.childElementCount > 0) {
         // 收集元素的直接文本节点（不包含子元素的文本节点）
-        const textNodes = [];
-        const treeWalker = document.createTreeWalker(
-          element,
-          NodeFilter.SHOW_TEXT,
-          {
-            acceptNode: function (node) {
-              // 只接受直接子文本节点，跳过深层文本节点
-              if (node.parentNode !== element) {
-                return NodeFilter.FILTER_SKIP;
-              }
-              return NodeFilter.FILTER_ACCEPT;
-            }
-          }
-        );
-
-        let node;
-        while (node = treeWalker.nextNode()) {
-          const text = node.textContent;
-          const trimmed = text.trim();
-          if (trimmed) {
-            // 保存文本节点的完整信息，包括前后空格
-            textNodes.push({
-              node,
-              text: trimmed,
-              leadingSpaces: text.match(/^\s*/)[0],
-              trailingSpaces: text.match(/\s*$/)[0]
-            });
-          }
-        }
+        const textNodes = this._getDirectTextNodes(element);
 
         // 如果元素包含多个文本节点，需要特殊处理
         if (textNodes.length > 1) {
@@ -966,13 +960,13 @@ class Tranzy {
           nodeTextMap.set(element, textNodes);
 
           // 为每个文本节点创建独立的翻译任务
-          textNodes.forEach(nodeInfo => {
+          for (const nodeInfo of textNodes) {
             textsToTranslate.push(nodeInfo.text);
             elementsWithText.push({
               isTextNode: true,
               nodeInfo
             });
-          });
+          }
 
           // 标记原始元素的翻译任务为跳过，因为已经为每个文本节点创建了独立任务
           textsToTranslate[i] = null;
@@ -989,7 +983,9 @@ class Tranzy {
     const termMappings = new Map();
 
     for (const text of validTexts) {
-      if (!text) continue;
+      if (!text) {
+        continue;
+      }
 
       // 检查文本中是否包含术语
       const parts = this._splitByTerms(text);
@@ -997,7 +993,9 @@ class Tranzy {
       // 如果被拆分，需要单独处理每个部分
       if (parts.length > 1) {
         termMappings.set(text, parts);
-        parts.forEach(part => termProcessedTexts.push(part));
+        for (const part of parts) {
+          termProcessedTexts.push(part)
+        }
       } else {
         termProcessedTexts.push(text);
       }
@@ -1008,26 +1006,21 @@ class Tranzy {
 
     // 检查手动词典和缓存
     const manualTranslations = {};
-    const textsToBeCached = [];
     const textsToFetch = [];
 
     for (const text of uniqueTextsToTranslate) {
       // 检查手动词典
       const toLangDict = this.config.manualDict[this.config.toLang];
-      const translation = toLangDict && (
-        toLangDict[text] ||
-        (toLangDict[text.toLowerCase()]?.case === false ? toLangDict[text.toLowerCase()] : null)
-      );
+      const translation = toLangDict && (toLangDict[text] || (toLangDict[text.toLowerCase()]?.case === false ? toLangDict[text.toLowerCase()] : null));
 
       if (translation) {
         manualTranslations[text] = translation.to;
       } else {
         // 检查缓存
-        const cachedTranslation = await this.cache.get(text, this.config.toLang, this.config.fromLang);
+        const cachedTranslation = await this.translationCache.get(text, this.config.toLang, this.config.fromLang);
         if (cachedTranslation) {
           manualTranslations[text] = cachedTranslation;
         } else {
-          textsToBeCached.push(text);
           textsToFetch.push(text);
         }
       }
@@ -1039,7 +1032,7 @@ class Tranzy {
         const apiResults = await this.config.translatorFn(textsToFetch, this.config.toLang, this.config.fromLang);
 
         // 更新缓存
-        await this.cache.setBatch(textsToFetch, apiResults, this.config.toLang, this.config.fromLang);
+        await this.translationCache.setBatch(textsToFetch, apiResults, this.config.toLang, this.config.fromLang);
 
         // 合并翻译结果
         textsToFetch.forEach((text, index) => {
@@ -1047,9 +1040,9 @@ class Tranzy {
         });
       } catch (error) {
         console.error('Tranzy: Batch translation failed / 批量翻译失败', error);
-        textsToFetch.forEach(text => {
+        for (const text of textsToFetch) {
           manualTranslations[text] = text; // 错误时保持原文
-        });
+        }
       }
     }
 
@@ -1064,21 +1057,31 @@ class Tranzy {
 
     // 然后处理未被拆分的文本
     for (const text of validTexts) {
-      if (!text || termMappings.has(text)) continue;
+      if (!text || termMappings.has(text)) {
+        continue;
+      }
       finalTranslations.set(text, manualTranslations[text] || text);
     }
 
     // 应用翻译结果
     validElementTexts.forEach((element, index) => {
       const originalText = validTexts[index];
-      if (!originalText) return;
+      if (!originalText) {
+        return;
+      }
 
       const translatedText = finalTranslations.get(originalText);
-      if (!translatedText) return;
+      if (!translatedText) {
+        return;
+      }
 
       // 处理文本节点
       if (element.isTextNode) {
-        const { node, leadingSpaces, trailingSpaces } = element.nodeInfo;
+        const {
+          node,
+          leadingSpaces,
+          trailingSpaces
+        } = element.nodeInfo;
         node.textContent = leadingSpaces + translatedText + trailingSpaces;
 
         // 检查父元素是否已经处理完所有子节点
@@ -1120,26 +1123,23 @@ class Tranzy {
   _getElementText(element) {
     // 使用TreeWalker遍历元素的所有文本节点
     let textContent = '';
-    const treeWalker = document.createTreeWalker(
-      element,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: function (node) {
-          // 只获取直接的文本节点，跳过深层元素内的文本
-          if (node.parentNode !== element) {
-            return NodeFilter.FILTER_SKIP;
-          }
-          return NodeFilter.FILTER_ACCEPT;
+    const treeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        // 只获取直接的文本节点，跳过深层元素内的文本
+        if (node.parentNode !== element) {
+          return NodeFilter.FILTER_SKIP;
         }
+        return NodeFilter.FILTER_ACCEPT;
       }
-    );
+    });
 
-    let node;
-    while (node = treeWalker.nextNode()) {
+    let node = treeWalker.nextNode();
+    while (node) {
       const text = node.textContent.trim();
       if (text) {
-        textContent += text + ' ';
+        textContent += `${text} `;
       }
+      node = treeWalker.nextNode();
     }
 
     textContent = textContent.trim();
@@ -1151,7 +1151,7 @@ class Tranzy {
 
     // 过滤掉只包含数字、空格、回车、特殊字符的文本
     // 但保留包含中文、英文、数字的文本
-    if (/^[\s\d\p{P}\p{S}]+$/u.test(textContent) && !/[\p{L}\u4e00-\u9fa5]/.test(textContent)) {
+    if (/^[\s\d!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+$/.test(textContent) && !/[a-zA-Z\u4e00-\u9fa5]/.test(textContent)) {
       return null;
     }
 
@@ -1176,38 +1176,13 @@ class Tranzy {
     // 如果元素有子元素，只替换直接的文本节点
     if (element.childElementCount > 0) {
       // 1. 收集所有直接文本节点信息
-      const textNodes = [];
-      const treeWalker = document.createTreeWalker(
-        element,
-        NodeFilter.SHOW_TEXT,
-        {
-          acceptNode: function (node) {
-            if (node.parentNode !== element) {
-              return NodeFilter.FILTER_SKIP;
-            }
-            return NodeFilter.FILTER_ACCEPT;
-          }
-        }
-      );
-
-      let node;
-      while (node = treeWalker.nextNode()) {
-        const text = node.textContent;
-        const trimmed = text.trim();
-        if (trimmed) {
-          textNodes.push({
-            node,
-            text: trimmed,
-            leadingSpaces: text.match(/^\s*/)[0],
-            trailingSpaces: text.match(/\s*$/)[0]
-          });
-        }
-      }
+      const textNodes = this._getDirectTextNodes(element);
 
       // 如果没有文本节点或只有一个文本节点，简单处理
       if (textNodes.length === 0) {
         return;
-      } else if (textNodes.length === 1) {
+      }
+      if (textNodes.length === 1) {
         const { node, leadingSpaces, trailingSpaces } = textNodes[0];
         node.textContent = leadingSpaces + translatedText + trailingSpaces;
         return;
@@ -1219,7 +1194,12 @@ class Tranzy {
       let usedTranslationLength = 0;
 
       textNodes.forEach((item, index) => {
-        const { node, text, leadingSpaces, trailingSpaces } = item;
+        const {
+          node,
+          text,
+          leadingSpaces,
+          trailingSpaces
+        } = item;
         let nodeTranslation;
 
         if (index === textNodes.length - 1) {
@@ -1232,10 +1212,7 @@ class Tranzy {
           const translationLength = Math.round(translatedText.length * ratio);
 
           // 从当前位置提取对应长度的翻译文本
-          nodeTranslation = translatedText.substring(
-            usedTranslationLength,
-            usedTranslationLength + translationLength
-          );
+          nodeTranslation = translatedText.substring(usedTranslationLength, usedTranslationLength + translationLength);
 
           // 更新已使用的翻译文本长度
           usedTranslationLength += translationLength;
@@ -1264,9 +1241,9 @@ class Tranzy {
     this.pendingElements.clear();
 
     // 关闭数据库连接
-    if (this.cache && this.cache.db) {
-      this.cache.db.close();
-      this.cache.db = null;
+    if (this.translationCache?.db) {
+      this.translationCache.db.close();
+      this.translationCache.db = null;
     }
 
     // 重置状态

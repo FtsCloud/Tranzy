@@ -118,30 +118,111 @@ tranzy.destroy();
 </script>
 ```
 
-### 3. Using Manual Translation Dictionary
+### 3. Using Manual Dictionary
 
 ```javascript
 const tranzy = new Tranzy({
   toLang: 'zh-Hans',
   manualDict: {
-    'zh-Hans': {
-      // Full form
-      'Hello World': {
-        to: '你好，世界',
-        standalone: true,  // Only translate when appearing independently
-        case: true        // Case sensitive
+    // Global dictionary for all target languages
+    'all': {
+      // Brand names, proper nouns that should not be translated
+      'tranzy': {         // Note: when case: false, keyword must be lowercase
+        to: 'Tranzy',        // Keep as is or specify a fixed translation
+        standalone: false,   // false means match within sentences too
+        case: false          // false means ignore case
       },
-      // Simplified form
-      'JavaScript': 'JavaScript (JS scripting language)',
-      // Supports regular expressions
+      // Simplified form, defaults to standalone: true, case: true
+      'Copyright': 'Copyright'
+    },
+    // Language-specific dictionary
+    'zh-Hans': {
+      // Complete form
+      'Hello World': {
+        to: '你好，世界',    
+        standalone: true,    // true means only replace when text exactly equals "Hello World"
+        case: true           // true means case-sensitive, must match exactly
+      },
+      // Simplified form (defaults to standalone: true, case: true)
+      'JavaScript': 'JavaScript (JS脚本语言)',
+      // Support for regex-like matching
       '\\d+ years old': {
         to: '岁',
-        standalone: true
+        standalone: true     // Only match standalone text
       }
     }
   }
 });
 ```
+
+#### Manual Dictionary Details
+
+1. **Global Dictionary Configuration `all`**
+   - Purpose: Maintain consistency of brand names and proper nouns across all languages
+   - Priority: `all` configuration has higher priority than language-specific configurations
+   - Use cases:
+     - Keep brand names unchanged (e.g., "Tranzy")
+     - Maintain fixed translations for common terms (e.g., "API", "HTML", "CSS", etc.)
+     - Display product names consistently in all languages
+
+2. **Standalone Matching `standalone`**
+   - `true` (default): Only replace when text exactly equals the keyword in the dictionary
+     - Example: If dictionary has "book", only text that exactly equals "book" will be replaced, "book" in "notebook" won't be replaced
+   - `false`: Replace keyword occurrences within text
+     - Example: If dictionary has "book", "book" in "notebook" will also be replaced
+     - Useful for maintaining consistent terminology throughout text
+
+3. **Case Sensitivity `case`**
+   - `true` (default): Case-sensitive matching
+     - Example: If dictionary has "JavaScript", only exact case match will be replaced
+   - `false`: Case-insensitive matching
+     - Example: If dictionary has "javascript" (must be lowercase), it can match "JavaScript", "JAVASCRIPT", etc.
+     - **Important**: When `case: false`, the keyword in the dictionary must be all lowercase
+
+4. **Usage Scenarios**
+
+   a. Protecting brand names (global configuration):
+   ```javascript
+   'all': {
+     'tranzy': {        // Note: when case: false, keyword must be lowercase
+       to: 'Tranzy',
+       standalone: false, // Protect within sentences too
+       case: false      // Ignore case
+     }
+   }
+   ```
+
+   b. Standardizing technical terms (language-specific):
+   ```javascript
+   'zh-Hans': {
+     'neural network': {
+       to: '神经网络',
+       standalone: false, // Replace within sentences too
+       case: false      // Ignore case
+     }
+   }
+   ```
+
+   c. Replacing complete sentences or paragraphs:
+   ```javascript
+   'zh-Hans': {
+     'Terms and Conditions': {
+       to: '条款和条件',
+       standalone: true,  // Only replace exact matches
+       case: true        // Case-sensitive
+     }
+   }
+   ```
+
+   d. Handling number formats:
+   ```javascript
+   'zh-Hans': {
+     '\\d+ pieces': {
+       to: '个',
+       standalone: false  // Replace within sentences
+     }
+   }
+   ```
 
 ### 4. Controlling Translation Scope
 
@@ -274,6 +355,8 @@ const tranzy = new Tranzy({
 
 ##### destroy()
 - No parameters
+- Destroys the instance, stops the observer, clears pending elements, and closes database connections
+- Returns the current instance, supporting chain calls
 
 ## Author
 
