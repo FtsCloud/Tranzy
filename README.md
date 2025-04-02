@@ -1,5 +1,7 @@
 # Tranzy
 
+[English](https://github.com/FtsCloud/Tranzy/blob/main/README_EN.md) | 简体中文
+
 Tranzy 是一个强大的网页多语言解决方案，让开发者能够轻松地为网站添加多语言支持。它提供了自动翻译、手动翻译词典、DOM变化监听等核心功能，同时内置了微软翻译API作为可选的翻译服务。
 
 ## 核心优势
@@ -30,13 +32,21 @@ Tranzy 是一个强大的网页多语言解决方案，让开发者能够轻松�
 
 ## 安装
 
+使用 npm 安装：
+
 ```bash
 npm install tranzy
 ```
 
+或者使用 pnpm 安装：
+
+```bash
+pnpm add tranzy
+```
+
 ## 快速开始
 
-### 1. 基础使用
+### 1. 使用 ES Module
 
 ```javascript
 import Tranzy from 'tranzy';
@@ -80,7 +90,35 @@ tranzy.stopObserver();
 tranzy.destroy();
 ```
 
-### 2. 使用手动翻译词典
+### 2. 使用 UMD 版本
+
+```html
+<!-- 引入UMD版本的Tranzy -->
+<script src="path/to/tranzy.umd.js"></script>
+<script>
+  // 创建Tranzy实例
+  const tranzy = new Tranzy.default({
+    toLang: 'zh-Hans',
+    beforeTranslate: () => {
+      console.log('开始翻译');
+    },
+    afterTranslate: () => {
+      console.log('翻译完成');
+    }
+  });
+
+  // 使用其他方法
+  Tranzy.getBrowserLang().then(lang => {
+    console.log('浏览器语言:', lang);
+  });
+
+  // 翻译页面
+  tranzy.translatePage();
+  tranzy.startObserver();
+</script>
+```
+
+### 3. 使用手动翻译词典
 
 ```javascript
 const tranzy = new Tranzy({
@@ -105,7 +143,7 @@ const tranzy = new Tranzy({
 });
 ```
 
-### 3. 控制翻译范围
+### 4. 控制翻译范围
 
 ```javascript
 const tranzy = new Tranzy({
