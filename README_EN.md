@@ -51,43 +51,10 @@ pnpm add tranzy
 ```javascript
 import Tranzy from 'tranzy';
 
-// Create Tranzy instance
-const tranzy = new Tranzy({
-  toLang: 'zh-Hans',           // Target language
-  fromLang: 'en',             // Source language (optional)
-  ignore: ['.no-translate'],  // List of selectors to ignore
-  force: ['.must-translate'], // List of selectors to force translation
-  doneClass: 'tranzy-done',   // Marker class for translated elements
-  pendingClass: 'tranzy-pending', // Marker class for elements being translated
-  batch: 100,                 // Batch size for translation
-  manualDict: {               // Manual translation dictionary
-    'zh-Hans': {
-      'Hello': {
-        to: '你好',
-        standalone: true,     // Whether to match independently
-        case: true           // Whether to be case-sensitive
-      }
-    }
-  },
-  beforeTranslate: () => {    // Hook before translation starts
-    console.log('Translation started');
-  },
-  afterTranslate: () => {     // Hook after translation completes
-    console.log('Translation completed');
-  }
-});
-
-// First translate the entire page
-tranzy.translatePage(); // Defaults to translating body, can pass a CSS selector to limit the translation area
-
-// Then start observing DOM changes and automatically translate
-tranzy.startObserver(); // Defaults to observing body, can pass a CSS selector to limit the observation area
-
-// Stop observing
-tranzy.stopObserver();
-
-// Destroy instance
-tranzy.destroy();
+// Only three lines of code to automatically translate your website to the browser's language
+const tranzy = new Tranzy();
+tranzy.translatePage();    // Translate the entire page
+tranzy.startObserver();    // Watch DOM changes, automatically translate new content
 ```
 
 ### 2. Using UMD Version
@@ -96,39 +63,78 @@ tranzy.destroy();
 <!-- Include UMD version of Tranzy -->
 <script src="path/to/tranzy.umd.js"></script>
 <script>
-  // Create Tranzy instance
-  const tranzy = new Tranzy.default({
-    toLang: 'zh-Hans',
-    beforeTranslate: () => {
-      console.log('Translation started');
-    },
-    afterTranslate: () => {
-      console.log('Translation completed');
-    }
-  });
-
-  // Use other methods
-  Tranzy.getBrowserLang().then(lang => {
-    console.log('Browser language:', lang);
-  });
-
-  // Translate page
-  tranzy.translatePage();
-  tranzy.startObserver();
+  // Only three lines of code to automatically translate your website to the browser's language
+  const tranzy = new Tranzy.Translator();
+  tranzy.translatePage();    // Translate the entire page
+  tranzy.startObserver();    // Watch DOM changes, automatically translate new content
 </script>
 ```
+
+## Advanced Configuration
+
+If you need more fine-grained control, Tranzy provides rich configuration options:
+
+```javascript
+import Tranzy from 'tranzy';
+
+// Create a Tranzy instance with advanced configuration
+const tranzy = new Tranzy({
+  toLang: 'zh-Hans',           // Target language
+  fromLang: 'en',              // Source language (optional)
+  ignore: ['.no-translate'],   // Selectors to ignore
+  force: ['.must-translate'],  // Selectors to force translate (priority over ignore)
+  manualDict: {                // Manual translation dictionary
+    'zh-Hans': {
+      'Hello': '你好'
+    }
+  },
+  beforeTranslate: () => {     // Hook before translation starts
+    console.log('Translation started');
+  },
+  afterTranslate: () => {      // Hook after translation completes
+    console.log('Translation completed');
+  }
+});
+
+tranzy.translatePage();
+tranzy.startObserver();
+```
+
+### Default Ignored Elements
+
+Tranzy already has the following elements configured to be ignored by default:
+
+```javascript
+// These elements and their content will not be translated by default
+const DEFAULT_IGNORE_SELECTORS = [
+  'style',            // Style tags
+  'script',           // Script tags
+  'noscript',         // No-script tags
+  'kbd',              // Keyboard input tags
+  'code',             // Code tags
+  'pre',              // Preformatted text tags
+  'input',            // Input fields
+  'textarea',         // Text areas
+  '[contenteditable="true"]', // Editable elements
+  '.tranzy-ignore'    // Custom ignore class
+];
+```
+
+You can add more selectors to ignore through the `ignore` option, but using `force` selectors can override ignore rules because **force has priority over ignore**.
 
 ### 3. Using Manual Dictionary
 
 ```javascript
+// ES6 mode
+import Tranzy from 'tranzy';
 const tranzy = new Tranzy({
-  toLang: 'zh-Hans',
+  toLang: 'en',
   manualDict: {
-    // Global dictionary for all target languages
+    // Global dictionary for all languages
     'all': {
       // Brand names, proper nouns that should not be translated
-      'tranzy': {         // Note: when case: false, keyword must be lowercase
-        to: 'Tranzy',        // Keep as is or specify a fixed translation
+      'tranzy': {         // Note: keyword must be lowercase when case: false
+        to: 'Tranzy',        // Keep original or specify fixed translation
         standalone: false,   // false means match within sentences too
         case: false          // false means ignore case
       },
@@ -227,6 +233,8 @@ const tranzy = new Tranzy({
 ### 4. Controlling Translation Scope
 
 ```javascript
+// ES6 mode
+import Tranzy from 'tranzy';
 const tranzy = new Tranzy({
   // Ignore specific elements
   ignore: [
@@ -234,10 +242,10 @@ const tranzy = new Tranzy({
     '#header',           // Ignore specific ID
     '[data-no-trans]'    // Ignore specific attribute
   ],
-  // Force translation of specific elements
+  // Force translate specific elements
   force: [
-    '.must-translate',   // Force translation of specific class
-    '#content'          // Force translation of specific ID
+    '.must-translate',   // Force translate specific class
+    '#content'          // Force translate specific ID
   ]
 });
 ```
@@ -298,7 +306,7 @@ console.log(browserLang); // 'zh-Hans' or 'en' etc.
 const tranzy = new Tranzy({
   toLang: 'zh-Hans',
   // Use custom translation function
-  translatorFn: async (texts, toLang, fromLang) => {
+  translateFn: async (texts, toLang, fromLang) => {
     // Implement custom translation logic
     return texts.map(text => `[${toLang}] ${text}`);
   }
@@ -334,8 +342,7 @@ const tranzy = new Tranzy({
   force: [],                 // Force translation selectors (optional, defaults to empty array)
   doneClass: 'tranzy-done',  // Marker class for translated elements (optional, defaults to 'tranzy-done')
   pendingClass: 'tranzy-pending', // Marker class for elements being translated (optional, defaults to 'tranzy-pending')
-  batch: 100,                // Batch size for translation (optional, defaults to 100)
-  translatorFn: translateText, // Custom translation function (optional, defaults to translateText)
+  translateFn: translateText, // Custom translation function (optional, defaults to translateText)
   manualDict: {},            // Manual translation dictionary (optional, defaults to empty object)
   beforeTranslate: null,     // Hook before translation (optional, defaults to null)
   afterTranslate: null       // Hook after translation (optional, defaults to null)

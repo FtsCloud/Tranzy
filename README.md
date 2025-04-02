@@ -51,22 +51,41 @@ pnpm add tranzy
 ```javascript
 import Tranzy from 'tranzy';
 
-// 创建Tranzy实例
+// 只需三行代码，即可自动将网站翻译为浏览器当前语言
+const tranzy = new Tranzy();
+tranzy.translatePage();    // 翻译整个页面
+tranzy.startObserver();    // 监听DOM变化，自动翻译新内容
+```
+
+### 2. 使用 UMD 版本
+
+```html
+<!-- 引入UMD版本的Tranzy -->
+<script src="path/to/tranzy.umd.js"></script>
+<script>
+  // 只需三行代码，即可自动将网站翻译为浏览器当前语言
+  const tranzy = new Tranzy.Translator();
+  tranzy.translatePage();    // 翻译整个页面
+  tranzy.startObserver();    // 监听DOM变化，自动翻译新内容
+</script>
+```
+
+## 高级配置
+
+如果需要更精细的控制，Tranzy还提供了丰富的配置选项：
+
+```javascript
+import Tranzy from 'tranzy';
+
+// 创建带有高级配置的Tranzy实例
 const tranzy = new Tranzy({
   toLang: 'zh-Hans',           // 目标语言
   fromLang: 'en',             // 源语言（可选）
   ignore: ['.no-translate'],  // 忽略的选择器列表
-  force: ['.must-translate'], // 强制翻译的选择器列表
-  doneClass: 'tranzy-done',   // 已翻译元素的标记类
-  pendingClass: 'tranzy-pending', // 正在翻译中的元素标记类
-  batch: 100,                 // 批量翻译的批次大小
+  force: ['.must-translate'], // 强制翻译的选择器列表（优先级高于ignore）
   manualDict: {               // 手动翻译词典
     'zh-Hans': {
-      'Hello': {
-        to: '你好',
-        standalone: true,     // 是否独立匹配
-        case: true           // 是否区分大小写
-      }
+      'Hello': '你好'
     }
   },
   beforeTranslate: () => {    // 翻译开始前的钩子
@@ -77,194 +96,31 @@ const tranzy = new Tranzy({
   }
 });
 
-// 先翻译整个页面
-tranzy.translatePage(); // 默认翻译body，可以传入css选择器限制翻译区域
-
-// 然后开始观察DOM变化并自动翻译
-tranzy.startObserver(); // 默认观察body，可以传入css选择器限制观察区域
-
-// 停止观察
-tranzy.stopObserver();
-
-// 销毁实例
-tranzy.destroy();
+tranzy.translatePage();
+tranzy.startObserver();
 ```
 
-### 2. 使用 UMD 版本
+### 默认忽略的元素
 
-```html
-<!-- 引入UMD版本的Tranzy -->
-<script src="path/to/tranzy.umd.js"></script>
-<script>
-  // 创建Tranzy实例
-  const tranzy = new Tranzy.default({
-    toLang: 'zh-Hans',
-    beforeTranslate: () => {
-      console.log('开始翻译');
-    },
-    afterTranslate: () => {
-      console.log('翻译完成');
-    }
-  });
-
-  // 使用其他方法
-  Tranzy.getBrowserLang().then(lang => {
-    console.log('浏览器语言:', lang);
-  });
-
-  // 翻译页面
-  tranzy.translatePage();
-  tranzy.startObserver();
-</script>
-```
-
-### 3. 使用手动翻译词典
+Tranzy默认已经配置了以下元素不进行翻译：
 
 ```javascript
-const tranzy = new Tranzy({
-  toLang: 'zh-Hans',
-  manualDict: {
-    // 全局词典，适用于所有目标语言
-    'all': {
-      // 品牌名称、专有名词等不需要翻译的词汇
-      'tranzy': {         // 注意：case: false 时关键词必须小写
-        to: 'Tranzy',        // 保持原样或指定固定翻译
-        standalone: false,   // false表示在句子中也匹配
-        case: false          // false表示忽略大小写
-      },
-      // 简化形式，默认 standalone: true, case: true
-      'Copyright': 'Copyright'
-    },
-    // 特定语言的词典
-    'zh-Hans': {
-      // 完整形式
-      'Hello World': {
-        to: '你好，世界',    
-        standalone: true,    // true表示只有当文本完全等于"Hello World"时才替换
-        case: true           // true表示区分大小写，必须完全匹配
-      },
-      // 简化形式（默认 standalone: true, case: true）
-      'JavaScript': 'JavaScript (JS脚本语言)',
-      // 支持正则表达式形式的匹配
-      '\\d+ years old': {
-        to: '岁',
-        standalone: true     // 仅匹配独立的文本
-      }
-    }
-  }
-});
+// 这些元素及其内容默认不会被翻译
+const DEFAULT_IGNORE_SELECTORS = [
+  'style',            // 样式标签
+  'script',           // 脚本标签
+  'noscript',         // 无脚本标签
+  'kbd',              // 键盘输入标签
+  'code',             // 代码标签
+  'pre',              // 预格式化文本标签
+  'input',            // 输入框
+  'textarea',         // 文本域
+  '[contenteditable="true"]', // 可编辑元素
+  '.tranzy-ignore'    // 自定义忽略类
+];
 ```
 
-#### 手动词典详细说明
-
-1. **全局词典配置 `all`**
-   - 目的：保持品牌名称、专有名词等在所有语言中的一致性
-   - 优先级：`all` 配置的优先级高于语言特定配置
-   - 适用场景：
-     - 品牌名称保持不变（如 "Tranzy"）
-     - 通用术语保持固定翻译（如 "API", "HTML", "CSS" 等）
-     - 产品名称在所有语言中统一显示
-
-2. **独立匹配 `standalone`**
-   - `true`（默认值）：仅当文本完全等于词典中的关键词时才进行替换
-     - 例：词典中有 "book"，只有文本完全等于 "book" 时才会被替换，"notebook" 中的 "book" 不会被替换
-   - `false`：在文本中出现词典关键词时也进行替换
-     - 例：词典中有 "book"，"notebook" 中的 "book" 也会被替换
-     - 适用于需要保持特定术语一致性的场景
-
-3. **大小写敏感 `case`**
-   - `true`（默认值）：区分大小写匹配
-     - 例：词典中有 "JavaScript"，只有大小写完全匹配时才会被替换
-   - `false`：忽略大小写匹配
-     - 例：词典中有 "javascript"（必须小写），可以匹配 "JavaScript"、"JAVASCRIPT" 等
-     - **重要**：当 `case: false` 时，词典中的关键词必须全部小写
-
-4. **使用场景示例**
-
-   a. 保护品牌名称（全局配置）：
-   ```javascript
-   'all': {
-     'tranzy': {        // 注意：case: false 时关键词必须小写
-       to: 'Tranzy',
-       standalone: false, // 在句子中也保护
-       case: false      // 忽略大小写
-     }
-   }
-   ```
-
-   b. 专业术语统一翻译（语言特定）：
-   ```javascript
-   'zh-Hans': {
-     'neural network': {
-       to: '神经网络',
-       standalone: false, // 在句子中也替换
-       case: false      // 忽略大小写
-     }
-   }
-   ```
-
-   c. 完整句子或段落替换：
-   ```javascript
-   'zh-Hans': {
-     'Terms and Conditions': {
-       to: '条款和条件',
-       standalone: true,  // 仅替换完整匹配
-       case: true        // 区分大小写
-     }
-   }
-   ```
-
-   d. 数字格式处理：
-   ```javascript
-   'zh-Hans': {
-     '\\d+ pieces': {
-       to: '个',
-       standalone: false  // 在句子中替换
-     }
-   }
-   ```
-
-### 4. 控制翻译范围
-
-```javascript
-const tranzy = new Tranzy({
-  // 忽略特定元素
-  ignore: [
-    '.no-translate',      // 忽略特定类
-    '#header',           // 忽略特定ID
-    '[data-no-trans]'    // 忽略特定属性
-  ],
-  // 强制翻译特定元素
-  force: [
-    '.must-translate',   // 强制翻译特定类
-    '#content'          // 强制翻译特定ID
-  ]
-});
-```
-
-### 4. 使用钩子函数
-
-```javascript
-const tranzy = new Tranzy({
-  // 翻译开始前的钩子
-  beforeTranslate: () => {
-    console.log('开始翻译');
-  },
-  // 翻译结束后的钩子
-  afterTranslate: () => {
-    console.log('翻译完成');
-  }
-});
-```
-
-### 2. 动态内容处理
-```javascript
-// 在动态加载内容后手动触发翻译
-const loadContent = () => {
-  loadDynamicContent();
-  tranzy.translatePage('.dynamic-content'); // 可以指定要翻译的元素，不传则默认翻译body
-};
-```
+您可以通过配置`ignore`选项添加更多忽略选择器，但使用`force`选择器可以覆盖忽略规则，因为**force的优先级高于ignore**。
 
 ## 高级功能
 
@@ -295,10 +151,12 @@ console.log(browserLang); // 'zh-Hans' 或 'en' 等
 ### 2. 自定义翻译函数
 
 ```javascript
+// ES6模式
+import Tranzy from 'tranzy';
 const tranzy = new Tranzy({
   toLang: 'zh-Hans',
   // 使用自定义翻译函数
-  translatorFn: async (texts, toLang, fromLang) => {
+  translateFn: async (texts, toLang, fromLang) => {
     // 实现自定义翻译逻辑
     return texts.map(text => `[${toLang}] ${text}`);
   }
@@ -327,6 +185,8 @@ const tranzy = new Tranzy({
 
 #### 构造函数
 ```javascript
+// ES6模式
+import Tranzy from 'tranzy';
 const tranzy = new Tranzy({
   toLang: 'zh-CN',           // 目标语言代码（可选，默认从浏览器语言设置获取）
   fromLang: '',              // 源语言代码（可选，默认为空字符串）
@@ -334,8 +194,7 @@ const tranzy = new Tranzy({
   force: [],                 // 强制翻译选择器列表（可选，默认为空数组）
   doneClass: 'tranzy-done',  // 已翻译元素的标记类（可选，默认为'tranzy-done'）
   pendingClass: 'tranzy-pending', // 正在翻译中的元素标记类（可选，默认为'tranzy-pending'）
-  batch: 100,                // 批量翻译的批次大小（可选，默认为100）
-  translatorFn: translateText, // 自定义翻译函数（可选，默认为translateText）
+  translateFn: translateText, // 自定义翻译函数（可选，默认为translateText）
   manualDict: {},            // 手动翻译词典（可选，默认为空对象）
   beforeTranslate: null,     // 翻译开始前的钩子函数（可选，默认为null）
   afterTranslate: null       // 翻译结束后的钩子函数（可选，默认为null）

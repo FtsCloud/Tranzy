@@ -49,8 +49,7 @@ const DEFAULT_CONFIG = {
   force: [],                           // 强制翻译选择器列表
   doneClass: 'tranzy-done',            // 已翻译元素的标记类
   pendingClass: 'tranzy-pending',      // 正在翻译中的元素标记类
-  batch: 100,                          // 批量翻译时的批次大小
-  translatorFn: translateText,          // 默认使用translateText函数
+  translateFn: translateText,          // 默认使用translateText函数
   manualDict: {},                      // 手动翻译词典
   beforeTranslate: null,               // 翻译开始前的钩子
   afterTranslate: null,                // 翻译结束后的钩子
@@ -470,9 +469,9 @@ export async function getBrowserLang() {
  * Tranzy核心类
  * 提供页面翻译和DOM变化监听功能
  */
-class Tranzy {
+export class Translator {
   /**
-   * 创建Tranzy实例
+   * 创建Translator实例
    * @param {Object} config - 配置选项
    * @param {string} config.toLang - 目标语言代码
    * @param {string} [config.fromLang=''] - 源语言代码
@@ -480,8 +479,7 @@ class Tranzy {
    * @param {string[]} [config.force=[]] - 强制翻译的选择器列表
    * @param {string} [config.doneClass='tranzy-done'] - 已翻译元素的标记类
    * @param {string} [config.pendingClass='tranzy-pending'] - 正在翻译中的元素标记类
-   * @param {number} [config.batch=100] - 批量翻译的批次大小
-   * @param {Function} [config.translatorFn=null] - 自定义翻译函数
+   * @param {Function} [config.translateFn=null] - 自定义翻译函数
    * @param {Object} [config.manualDict={}] - 手动翻译词典
    * @param {Function} [config.beforeTranslate=null] - 翻译开始前的钩子
    * @param {Function} [config.afterTranslate=null] - 翻译结束后的钩子
@@ -595,7 +593,7 @@ class Tranzy {
   /**
    * 开始观察DOM变化
    * @param {string} [root='body'] - 观察的根元素选择器
-   * @returns {Tranzy} - 当前实例，支持链式调用
+   * @returns {Translator} - 当前实例，支持链式调用
    */
   startObserver(root = 'body') {
     if (this.observer) {
@@ -668,7 +666,7 @@ class Tranzy {
 
   /**
    * 停止观察DOM变化
-   * @returns {Tranzy} - 当前实例，支持链式调用
+   * @returns {Translator} - 当前实例，支持链式调用
    */
   stopObserver() {
     if (this.observer) {
@@ -715,7 +713,7 @@ class Tranzy {
   /**
    * 翻译整个页面
    * @param {string} [root='body'] - 翻译的根元素选择器
-   * @returns {Promise<Tranzy>} - 当前实例，支持链式调用
+   * @returns {Promise<Translator>} - 当前实例，支持链式调用
    */
   async translatePage(root = 'body') {
     if (this.isTranslating) {
@@ -793,10 +791,9 @@ class Tranzy {
     }
 
     // 批量处理元素
-    const batchSize = this.config.batch;
-    for (let i = 0; i < validElements.length; i += batchSize) {
-      const batchElements = validElements.slice(i, i + batchSize);
-      const batchTexts = elementsText.slice(i, i + batchSize);
+    for (let i = 0; i < validElements.length; i += 100) {
+      const batchElements = validElements.slice(i, i + 100);
+      const batchTexts = elementsText.slice(i, i + 100);
       await this._translateElementBatch(batchElements, batchTexts);
     }
   }
@@ -1029,7 +1026,7 @@ class Tranzy {
     // 翻译未缓存的文本
     if (textsToFetch.length > 0) {
       try {
-        const apiResults = await this.config.translatorFn(textsToFetch, this.config.toLang, this.config.fromLang);
+        const apiResults = await this.config.translateFn(textsToFetch, this.config.toLang, this.config.fromLang);
 
         // 更新缓存
         await this.translationCache.setBatch(textsToFetch, apiResults, this.config.toLang, this.config.fromLang);
@@ -1231,7 +1228,7 @@ class Tranzy {
 
   /**
    * 销毁实例，释放资源
-   * @returns {Tranzy} - 当前实例，支持链式调用
+   * @returns {Translator} - 当前实例，支持链式调用
    */
   destroy() {
     // 停止DOM观察器
@@ -1253,4 +1250,4 @@ class Tranzy {
   }
 }
 
-export default Tranzy; 
+export default Translator; 
