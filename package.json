@@ -1,6 +1,6 @@
 {
   "name": "tranzy",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A powerful web multilingual solution for automatic translation",
   "type": "module",
   "main": "dist/tranzy.umd.js",

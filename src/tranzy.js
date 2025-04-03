@@ -487,9 +487,9 @@ export class Translator {
   constructor(config = {}) {
     this.config = {...DEFAULT_CONFIG, ...config};
 
-    // 合并 all 配置到当前语言的配置中，all 的优先级更高
+    // 合并 all 配置到当前语言的配置中，当前语言的优先级更高
     this.config.manualDict[this.config.toLang] = {
-      ...this.config.manualDict[this.config.toLang] || {}, ...this.config.manualDict.all || {}
+      ...this.config.manualDict.all || {}, ...this.config.manualDict[this.config.toLang] || {}
     };
 
     // 标准化manualDict配置
