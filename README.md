@@ -1,4 +1,4 @@
-# Tranzy v1.0.4
+# Tranzy v1.0.5
 
 English | [简体中文](https://github.com/FtsCloud/Tranzy/blob/main/README_ZH.md)
 
