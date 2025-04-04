@@ -3,3 +3,4 @@ node_modules/
 .cursorignore
 package-lock.json
 website
+.idea
