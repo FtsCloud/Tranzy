@@ -1,4 +1,4 @@
-# Tranzy v1.0.6
+# Tranzy v1.0.7
 
 English | [简体中文](https://github.com/FtsCloud/Tranzy/blob/main/README_ZH.md)
 
@@ -187,6 +187,8 @@ const tranzy = new Tranzy({
   }
 });
 ```
+
+> **Note:** Dictionary entries for specific languages (like 'zh-Hans') have higher priority than entries with the same name in the global dictionary ('all'). This design allows you to define common translations in the global dictionary while providing language-specific overrides, enhancing translation flexibility and accuracy.
 
 ### 4. Using Hook Functions
 

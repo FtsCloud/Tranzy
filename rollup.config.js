@@ -7,13 +7,14 @@ export default {
     {
       file: 'dist/tranzy.es.js',
       format: 'es',
-      sourcemap: true
+      sourcemap: true,
     },
     {
       file: 'dist/tranzy.umd.js',
       format: 'umd',
       name: 'Tranzy',
       sourcemap: true,
+      exports: 'named',
       globals: {
         'indexedDB': 'indexedDB'
       }

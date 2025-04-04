@@ -54,7 +54,21 @@ const tranzy = new Tranzy({
 // 启动翻译
 tranzy.translatePage();
 tranzy.startObserver();
-                            </code></pre></div><p><strong>注意：</strong> 当"fromLang"和"toLang"相同时，Tranzy会自动跳过翻译过程，提高性能。</p></section><section id="demo" class="docs-section"><h2>功能演示</h2><p>这里展示Tranzy的主要功能和效果，以便您直观了解如何使用及其效果。</p><h3>基本翻译示例</h3><p>以下是一个基本的翻译实例，展示了如何将网页从英文翻译为中文：</p><div class="demo-wrapper"><div class="demo-panel"><h4>源代码</h4><div class="code-block"><pre><code class="language-html">
+                            </code></pre></div><p><strong>注意：</strong> 当"fromLang"和"toLang"相同时，Tranzy会自动跳过翻译过程，提高性能。</p><h3>默认忽略的元素</h3><p>Tranzy默认已经配置了以下元素不进行翻译：</p><div class="code-block"><pre><code>
+// 这些元素及其内容默认不会被翻译
+const DEFAULT_IGNORE_SELECTORS = [
+  'style',            // 样式标签
+  'script',           // 脚本标签
+  'noscript',         // 无脚本标签
+  'kbd',              // 键盘输入标签
+  'code',             // 代码标签
+  'pre',              // 预格式化文本标签
+  'input',            // 输入框
+  'textarea',         // 文本域
+  '[contenteditable="true"]', // 可编辑元素
+  '.tranzy-ignore'    // 自定义忽略类
+];
+                            </code></pre></div><p>您可以通过配置"ignore"选项添加更多忽略选择器，但使用"force"选择器可以覆盖忽略规则，因为<strong>force的优先级高于ignore</strong>。</p></section><section id="demo" class="docs-section"><h2>功能演示</h2><p>这里展示Tranzy的主要功能和效果，以便您直观了解如何使用及其效果。</p><h3>基本翻译示例</h3><p>以下是一个基本的翻译实例，展示了如何将网页从英文翻译为中文：</p><div class="demo-wrapper"><div class="demo-panel"><h4>源代码</h4><div class="code-block"><pre><code class="language-html">
 &lt;!-- HTML 内容 --&gt;
 &lt;div id="content"&gt;
   &lt;h2&gt;Welcome to Tranzy&lt;/h2&gt;
@@ -285,7 +299,7 @@ const tranzy = new Tranzy.Translator({
     }
   }
 });
-                            </code></pre></div></section><section id="caching" class="docs-section"><h2>缓存管理</h2><p>Tranzy使用IndexedDB存储翻译结果，提高翻译效率，减少API调用：</p><div class="code-block"><pre><code>
+                            </code></pre></div><p><strong>注意：</strong> 特定语言的词典条目（如'zh-Hans'）优先级高于全局词典('all')中的同名条目。这种设计使得您可以在全局词典中定义通用翻译，同时在特定语言中进行个性化覆盖，增强了翻译的灵活性和精确性。</p></section><section id="caching" class="docs-section"><h2>缓存管理</h2><p>Tranzy使用IndexedDB存储翻译结果，提高翻译效率，减少API调用：</p><div class="code-block"><pre><code>
 // Tranzy的缓存是自动管理的
 // 使用IndexedDB来存储翻译结果，翻译过一次的内容会被自动缓存
 // 缓存系统会为每个翻译文本使用FNV-1a哈希算法生成唯一键值

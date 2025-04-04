@@ -60,8 +60,13 @@ const DEFAULT_CONFIG = {
  * 使用IndexedDB存储翻译结果，提高性能并减少API调用
  */
 class TranslationCache {
-  constructor() {
-    this.dbName = 'tranzy-cache';      // 数据库名称
+  /**
+   * 创建TranslationCache实例
+   * @param {string} toLang - 目标语言代码
+   * @param {string} [fromLang=''] - 源语言代码
+   */
+  constructor(toLang, fromLang = '') {
+    this.dbName = `tranzy-${toLang}${fromLang ? '-'+fromLang : ''}`; // 基于语言对的数据库名称
     this.storeName = 'translations';    // 存储对象名称
     this.db = null;                     // 数据库实例
     this.initPromise = this._initDatabase(); // 初始化Promise
@@ -104,7 +109,7 @@ class TranslationCache {
       };
 
       request.onerror = (event) => {
-        console.error('Tranzy: Failed to initialize cache database / 初始化缓存数据库失败', event.target.error);
+        console.error(`Tranzy: Failed to initialize cache database / 初始化缓存数据库失败: ${this.dbName}`, event.target.error);
         reject(event.target.error);
       };
     });
@@ -113,13 +118,12 @@ class TranslationCache {
   /**
    * 获取缓存的翻译结果
    * @param {string} text - 原文
-   * @param {string} toLang - 目标语言
-   * @param {string} [fromLang=''] - 源语言
    * @returns {Promise<string|null>} - 缓存的翻译结果或null
    */
-  async get(text, toLang, fromLang = '') {
+  async get(text) {
     await this.initPromise;
-    const id = this._generateHash(`${text}|${toLang}|${fromLang}`);
+    // 只对文本本身进行哈希
+    const id = this._generateHash(text);
 
     return new Promise((resolve) => {
       if (!this.db) {
@@ -145,13 +149,12 @@ class TranslationCache {
    * 设置翻译结果到缓存
    * @param {string} text - 原文
    * @param {string} translation - 翻译结果
-   * @param {string} toLang - 目标语言
-   * @param {string} [fromLang=''] - 源语言
    * @returns {Promise<void>}
    */
-  async set(text, translation, toLang, fromLang = '') {
+  async set(text, translation) {
     await this.initPromise;
-    const id = this._generateHash(`${text}|${toLang}|${fromLang}`);
+    // 只对文本本身进行哈希
+    const id = this._generateHash(text);
 
     return new Promise((resolve) => {
       if (!this.db) {
@@ -180,15 +183,23 @@ class TranslationCache {
    * 批量设置翻译结果到缓存
    * @param {string[]} texts - 原文数组
    * @param {string[]} translations - 翻译结果数组
-   * @param {string} toLang - 目标语言
-   * @param {string} [fromLang=''] - 源语言
    * @returns {Promise<void>}
    */
-  async setBatch(texts, translations, toLang, fromLang = '') {
+  async setBatch(texts, translations) {
     await this.initPromise;
     await Promise.all(texts.map((text, index) => {
-      return this.set(text, translations[index], toLang, fromLang);
+      return this.set(text, translations[index]);
     }));
+  }
+
+  /**
+   * 销毁实例，关闭数据库连接
+   */
+  destroy() {
+    if (this.db) {
+      this.db.close();
+      this.db = null;
+    }
   }
 }
 
@@ -506,7 +517,7 @@ export class Translator {
     }
 
     this.observer = null;
-    this.translationCache = new TranslationCache();
+    this.translationCache = new TranslationCache(this.config.toLang, this.config.fromLang);
 
     // 合并并去重忽略选择器
     this.config.ignore = [
@@ -1020,7 +1031,7 @@ export class Translator {
         manualTranslations[text] = translation.to;
       } else {
         // 检查缓存
-        const cachedTranslation = await this.translationCache.get(text, this.config.toLang, this.config.fromLang);
+        const cachedTranslation = await this.translationCache.get(text);
         if (cachedTranslation) {
           manualTranslations[text] = cachedTranslation;
         } else {
@@ -1035,7 +1046,7 @@ export class Translator {
         const apiResults = await this.config.translateFn(textsToFetch, this.config.toLang, this.config.fromLang);
 
         // 更新缓存
-        await this.translationCache.setBatch(textsToFetch, apiResults, this.config.toLang, this.config.fromLang);
+        await this.translationCache.setBatch(textsToFetch, apiResults);
 
         // 合并翻译结果
         textsToFetch.forEach((text, index) => {
@@ -1248,9 +1259,9 @@ export class Translator {
     this.pendingElements.clear();
 
     // 关闭数据库连接
-    if (this.translationCache?.db) {
-      this.translationCache.db.close();
-      this.translationCache.db = null;
+    if (this.translationCache) {
+      this.translationCache.destroy();
+      this.translationCache = null;
     }
 
     // 重置状态

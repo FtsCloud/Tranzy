@@ -1,4 +1,4 @@
-# Tranzy v1.0.6
+# Tranzy v1.0.7
 
 [English](https://github.com/FtsCloud/Tranzy/blob/main/README.md) | 简体中文
 
@@ -187,6 +187,8 @@ const tranzy = new Tranzy({
   }
 });
 ```
+
+> **注意：** 特定语言的词典条目（如'zh-Hans'）优先级高于全局词典('all')中的同名条目。这种设计使得您可以在全局词典中定义通用翻译，同时在特定语言中进行个性化覆盖，增强了翻译的灵活性和精确性。
 
 ### 4. 使用钩子函数
 
