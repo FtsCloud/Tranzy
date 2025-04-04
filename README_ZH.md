@@ -1,4 +1,4 @@
-# Tranzy v1.0.5
+# Tranzy v1.0.6
 
 [English](https://github.com/FtsCloud/Tranzy/blob/main/README.md) | 简体中文
 
@@ -99,6 +99,8 @@ const tranzy = new Tranzy({
 tranzy.translatePage();
 tranzy.startObserver();
 ```
+
+> **注意：** 当`fromLang`和`toLang`相同时，`translatePage()`和`startObserver()`会自动跳过翻译过程。
 
 ### 1. 默认忽略的元素
 

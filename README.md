@@ -1,4 +1,4 @@
-# Tranzy v1.0.5
+# Tranzy v1.0.6
 
 English | [简体中文](https://github.com/FtsCloud/Tranzy/blob/main/README_ZH.md)
 
@@ -99,6 +99,8 @@ const tranzy = new Tranzy({
 tranzy.translatePage();
 tranzy.startObserver();
 ```
+
+> **Note:** When `fromLang` and `toLang` are the same, `translatePage()` and `startObserver()` will automatically skip the translation process.
 
 ### 1. Default Ignored Elements
 

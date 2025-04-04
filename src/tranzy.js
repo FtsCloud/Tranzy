@@ -596,6 +596,11 @@ export class Translator {
    * @returns {Translator} - 当前实例，支持链式调用
    */
   startObserver(root = 'body') {
+    // 如果源语言和目标语言相同，跳过翻译过程
+    if (this.config.fromLang === this.config.toLang) {
+      return this;
+    }
+
     if (this.observer) {
       this.observer.disconnect();
     }
@@ -716,7 +721,8 @@ export class Translator {
    * @returns {Promise<Translator>} - 当前实例，支持链式调用
    */
   async translatePage(root = 'body') {
-    if (this.isTranslating) {
+    // 如果源语言和目标语言相同，跳过翻译过程
+    if (this.isTranslating || this.config.fromLang === this.config.toLang) {
       return this;
     }
 
@@ -1180,7 +1186,11 @@ export class Translator {
         return;
       }
       if (textNodes.length === 1) {
-        const { node, leadingSpaces, trailingSpaces } = textNodes[0];
+        const {
+          node,
+          leadingSpaces,
+          trailingSpaces
+        } = textNodes[0];
         node.textContent = leadingSpaces + translatedText + trailingSpaces;
         return;
       }
