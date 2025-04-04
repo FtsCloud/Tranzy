@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -w",
+    "minify": "minify-web -d website -o website-min"
   },
   "keywords": [
     "translate",
