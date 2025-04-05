@@ -1,6 +1,6 @@
 !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t="undefined"!=typeof globalThis?globalThis:t||self).Tranzy={})}(this,(function(t){"use strict";
 /**
-   * Tranzy - 网页自动翻译插件
+   * Tranzy.js - 专业的网页国际化解决方案 | JavaScript自动翻译库
    *
    * 主要功能：
    * 1. 自动检测DOM变化并翻译新增内容
