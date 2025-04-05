@@ -66,7 +66,7 @@ class TranslationCache {
    * @param {string} [fromLang=''] - 源语言代码
    */
   constructor(toLang, fromLang = '') {
-    this.dbName = `tranzy-${toLang}${fromLang ? '-'+fromLang : ''}`; // 基于语言对的数据库名称
+    this.dbName = `tranzy-${toLang}${fromLang ? '-' + fromLang : ''}`; // 基于语言对的数据库名称
     this.storeName = 'translations';    // 存储对象名称
     this.db = null;                     // 数据库实例
     this.initPromise = this._initDatabase(); // 初始化Promise
@@ -1020,7 +1020,7 @@ export class Translator {
 
     // 检查手动词典和缓存
     const manualTranslations = {};
-    const textsToFetch = [];
+    let textsToFetch = [];
 
     for (const text of uniqueTextsToTranslate) {
       // 检查手动词典
@@ -1040,6 +1040,11 @@ export class Translator {
       }
     }
 
+    textsToFetch = textsToFetch.filter(text => {
+      // 过滤掉只包含数字、空格、回车、特殊字符的文本
+      return /^(?![\d\s\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E\r\n，。？！；：“”‘’【】（）·《》…]*$).+/.test(text)
+    })
+
     // 翻译未缓存的文本
     if (textsToFetch.length > 0) {
       try {
@@ -1049,9 +1054,9 @@ export class Translator {
         await this.translationCache.setBatch(textsToFetch, apiResults);
 
         // 合并翻译结果
-        textsToFetch.forEach((text, index) => {
-          manualTranslations[text] = apiResults[index];
-        });
+        for (let i = 0; i < textsToFetch.length; i++) {
+          manualTranslations[textsToFetch[i]] = apiResults[i];
+        }
       } catch (error) {
         console.error('Tranzy: Batch translation failed / 批量翻译失败', error);
         for (const text of textsToFetch) {
@@ -1157,17 +1162,6 @@ export class Translator {
     }
 
     textContent = textContent.trim();
-
-    // 如果是空文本，直接返回null
-    if (!textContent || /^\s*$/.test(textContent)) {
-      return null;
-    }
-
-    // 过滤掉只包含数字、空格、回车、特殊字符的文本
-    // 但保留包含中文、英文、数字的文本
-    if (/^[\s\d!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+$/.test(textContent) && !/[a-zA-Z\u4e00-\u9fa5]/.test(textContent)) {
-      return null;
-    }
 
     return textContent;
   }

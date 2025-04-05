@@ -1,98 +1,98 @@
-# Tranzy v1.0.7
+# Tranzy v1.0.8
 
-English | [简体中文](https://github.com/FtsCloud/Tranzy/blob/main/README_ZH.md)
+[English](https://github.com/FtsCloud/Tranzy/blob/main/README_EN.md) | 简体中文
 
-Tranzy is a powerful multi-language solution for web pages, allowing developers to easily add multi-language support to their websites. It provides core features such as automatic translation, manual translation dictionary, DOM mutation observation, and more, while also integrating Microsoft Translator API as an optional translation service.
+Tranzy 是一个强大的网页多语言解决方案，让开发者能够轻松地为网站添加多语言支持。它提供了自动翻译、手动翻译词典、DOM变化监听等核心功能，同时内置了微软翻译API作为可选的翻译服务。
 
-## Core Advantages
+## 核心优势
 
-### 1. Developer-Friendly
-- 🚀 Zero configuration required, automatically gets target language from browser language settings
-- 🛠️ Provides flexible configuration options to meet various customization needs
-- 🔌 Supports custom translation functions, easily replace default translation service
-- 📝 Provides rich hook functions for custom processing
+### 1. 开发友好
+- 🚀 零配置即可使用，自动从浏览器语言设置获取目标语言
+- 🛠️ 提供灵活的配置选项，满足各种定制需求
+- 🔌 支持自定义翻译函数，可轻松替换默认翻译服务
+- 📝 提供丰富的钩子函数，方便进行自定义处理
 
-### 2. Performance Optimization
-- ⚡ Uses IndexedDB for translation caching, reducing repeated translations
-- 📦 Supports batch translation for improved efficiency
-- 🔄 Intelligent DOM mutation observation, only translates new content
-- 💾 Automatically manages translation cache, optimizing memory usage
+### 2. 性能优化
+- ⚡ 使用 IndexedDB 进行翻译缓存，减少重复翻译
+- 📦 支持批量翻译，提高翻译效率
+- 🔄 智能的DOM变化监听，只翻译新增内容
+- 💾 自动管理翻译缓存，优化内存使用
 
-### 3. Powerful Features
-- 🌐 Automatically detects DOM changes and translates new content
-- 📚 Supports manual translation dictionary and terminology handling
-- 🎯 Supports forced translation and ignoring specific elements
-- 🔍 Supports language detection and browser language recognition
+### 3. 功能强大
+- 🌐 自动检测DOM变化并翻译新增内容
+- 📚 支持手动翻译词典和术语处理
+- 🎯 支持强制翻译和忽略特定元素
+- 🔍 支持语言检测和浏览器语言识别
 
-### 4. Flexible Usage
-- 🎨 Supports custom translation styles and marker classes
-- 🔄 Can enable/disable DOM observation at any time
-- 📱 Supports translation of dynamically loaded content
-- 🌍 Supports multiple languages and BCP 47 language codes
+### 4. 使用灵活
+- 🎨 支持自定义翻译样式和标记类
+- 🔄 可随时开启/关闭DOM监听
+- 📱 支持动态加载的内容翻译
+- 🌍 支持多种语言和BCP 47语言代码
 
-## Installation
+## 安装
 
-Install with npm:
+使用 npm 安装：
 
 ```bash
 npm install tranzy
 ```
 
-Or install with pnpm:
+或者使用 pnpm 安装：
 
 ```bash
 pnpm add tranzy
 ```
 
-## Quick Start
+## 快速开始
 
-### 1. Using ES Module
+### 1. 使用 ES Module
 
 ```javascript
 import Tranzy from 'tranzy';
 
-// Just three lines of code to automatically translate your website to the browser's current language
+// 只需三行代码，即可自动将网站翻译为浏览器当前语言
 const tranzy = new Tranzy();
-tranzy.translatePage();    // Translate the entire page
-tranzy.startObserver();    // Watch DOM changes, automatically translate new content
+tranzy.translatePage();    // 翻译整个页面
+tranzy.startObserver();    // 监听DOM变化，自动翻译新内容
 ```
 
-### 2. Using UMD Version
+### 2. 使用 UMD 版本
 
 ```html
-<!-- Include UMD version of Tranzy -->
+<!-- 引入UMD版本的Tranzy -->
 <script src="path/to/tranzy.umd.js"></script>
 <script>
-  // Just three lines of code to automatically translate your website to the browser's current language
+  // 只需三行代码，即可自动将网站翻译为浏览器当前语言
   const tranzy = new Tranzy.Translator();
-  tranzy.translatePage();    // Translate the entire page
-  tranzy.startObserver();    // Watch DOM changes, automatically translate new content
+  tranzy.translatePage();    // 翻译整个页面
+  tranzy.startObserver();    // 监听DOM变化，自动翻译新内容
 </script>
 ```
 
-## Advanced Configuration
+## 高级配置
 
-If you need more fine-grained control, Tranzy provides rich configuration options:
+如果需要更精细的控制，Tranzy还提供了丰富的配置选项：
 
 ```javascript
 import Tranzy from 'tranzy';
 
-// Create a Tranzy instance with advanced configuration
+// 创建带有高级配置的Tranzy实例
 const tranzy = new Tranzy({
-  toLang: 'zh-Hans',           // Target language
-  fromLang: 'en',              // Source language (optional)
-  ignore: ['.no-translate'],   // Selectors to ignore
-  force: ['.must-translate'],  // Selectors to force translate (priority over ignore)
-  manualDict: {                // Manual translation dictionary
+  toLang: 'zh-Hans',           // 目标语言
+  fromLang: 'en',             // 源语言（可选）
+  ignore: ['.no-translate'],  // 忽略的选择器列表
+  force: ['.must-translate'], // 强制翻译的选择器列表（优先级高于ignore）
+  manualDict: {               // 手动翻译词典
     'zh-Hans': {
       'Tranzy': '全译'
     }
   },
-  beforeTranslate: () => {     // Hook before translation starts
-    console.log('Translation started');
+  beforeTranslate: () => {    // 翻译开始前的钩子
+    console.log('开始翻译');
   },
-  afterTranslate: () => {      // Hook after translation completes
-    console.log('Translation completed');
+  afterTranslate: () => {     // 翻译结束后的钩子
+    console.log('翻译完成');
   }
 });
 
@@ -100,176 +100,176 @@ tranzy.translatePage();
 tranzy.startObserver();
 ```
 
-> **Note:** When `fromLang` and `toLang` are the same, `translatePage()` and `startObserver()` will automatically skip the translation process.
+> **注意：** 当`fromLang`和`toLang`相同时，`translatePage()`和`startObserver()`会自动跳过翻译过程。
 
-### 1. Default Ignored Elements
+### 1. 默认忽略的元素
 
-Tranzy already has the following elements configured to be ignored by default:
+Tranzy默认已经配置了以下元素不进行翻译：
 
 ```javascript
-// These elements and their content will not be translated by default
+// 这些元素及其内容默认不会被翻译
 const DEFAULT_IGNORE_SELECTORS = [
-  'style',            // Style tags
-  'script',           // Script tags
-  'noscript',         // No-script tags
-  'kbd',              // Keyboard input tags
-  'code',             // Code tags
-  'pre',              // Preformatted text tags
-  'input',            // Input fields
-  'textarea',         // Text areas
-  '[contenteditable="true"]', // Editable elements
-  '.tranzy-ignore'    // Custom ignore class
+  'style',            // 样式标签
+  'script',           // 脚本标签
+  'noscript',         // 无脚本标签
+  'kbd',              // 键盘输入标签
+  'code',             // 代码标签
+  'pre',              // 预格式化文本标签
+  'input',            // 输入框
+  'textarea',         // 文本域
+  '[contenteditable="true"]', // 可编辑元素
+  '.tranzy-ignore'    // 自定义忽略类
 ];
 ```
 
-You can add more selectors to ignore through the `ignore` option, but using `force` selectors can override ignore rules because **force has priority over ignore**.
+您可以通过配置`ignore`选项添加更多忽略选择器，但使用`force`选择器可以覆盖忽略规则，因为**force的优先级高于ignore**。
 
-### 2. Controlling Translation Scope
+### 2. 控制翻译范围
 
 ```javascript
-// ES6 mode
+// ES6模式
 import Tranzy from 'tranzy';
 const tranzy = new Tranzy({
-  // Ignore specific elements
+  // 忽略特定元素
   ignore: [
-    '.no-translate',      // Ignore specific class
-    '#header',           // Ignore specific ID
-    '[data-no-trans]'    // Ignore specific attribute
+    '.no-translate',      // 忽略特定类
+    '#header',           // 忽略特定ID
+    '[data-no-trans]'    // 忽略特定属性
   ],
-  // Force translate specific elements
+  // 强制翻译特定元素
   force: [
-    '.must-translate',   // Force translate specific class
-    '#content'          // Force translate specific ID
+    '.must-translate',   // 强制翻译特定类
+    '#content'          // 强制翻译特定ID
   ]
 });
 ```
 
-### 3. Using Manual Dictionary
+### 3. 使用手动翻译词典
 
 ```javascript
-// ES6 mode
+// ES6模式
 import Tranzy from 'tranzy';
 const tranzy = new Tranzy({
   toLang: 'zh-Hans',
   manualDict: {
-    // Global dictionary for all languages
+    // 全局词典，适用于所有目标语言
     'all': {
-      // Brand names, proper nouns that should not be translated
+      // 品牌名称、专有名词等不需要翻译的词汇
       'tranzy': {           
-        to: 'tranzy',       // Ensure capitalization remains unchanged
-        standalone: false,  // Match within sentences too
+        to: 'tranzy',       // 保证首字母大小写保持不变
+        standalone: false,  // 在句子中也进行匹配
       },
       'Tranzy': {
-        to: 'Tranzy',       // Uppercase form also remains unchanged
-        standalone: false,  // Match within sentences too
+        to: 'Tranzy',       // 大写形式也保持不变
+        standalone: false,  // 在句子中也进行匹配
       },
-      // Simplified form, defaults to standalone: true, case: true
+      // 简化形式，默认 standalone: true, case: true
       'Copyright': 'Copyright'
     },
-    // Language-specific dictionary
+    // 特定语言的词典
     'zh-Hans': {
-      // Complete form
+      // 完整形式
       'Hello World': {
         to: '你好，世界',    
       },
-      // Simplified form
+      // 简化形式
       'JavaScript': 'JavaScript (JS脚本语言)',
-      // Support for regex-like matching
+      // 支持正则表达式形式的匹配
       '\\d+ years old': {
         to: '岁',
       },
       'tranzy': {
-        to: '全译',         // Special handling for Chinese: change to "全译"
-        standalone: false,  // Match within sentences too
-        case: false         // Ignore case
+        to: '全译',         // 中文特别处理为"全译"
+        standalone: false,  // 在句子中也进行匹配
+        case: false         // 忽略大小写
       }
     }
   }
 });
 ```
 
-> **Note:** Dictionary entries for specific languages (like 'zh-Hans') have higher priority than entries with the same name in the global dictionary ('all'). This design allows you to define common translations in the global dictionary while providing language-specific overrides, enhancing translation flexibility and accuracy.
+> **注意：** 特定语言的词典条目（如'zh-Hans'）优先级高于全局词典('all')中的同名条目。这种设计使得您可以在全局词典中定义通用翻译，同时在特定语言中进行个性化覆盖，增强了翻译的灵活性和精确性。
 
-### 4. Using Hook Functions
+### 4. 使用钩子函数
 
 ```javascript
-// ES6 mode
+// ES6模式
 import Tranzy from 'tranzy';
 const tranzy = new Tranzy({
-  // Hook before translation starts
+  // 翻译开始前的钩子
   beforeTranslate: () => {
-    console.log('Translation started');
+    console.log('开始翻译');
   },
-  // Hook after translation completes
+  // 翻译结束后的钩子
   afterTranslate: () => {
-    console.log('Translation completed');
+    console.log('翻译完成');
   }
 });
 ```
 
-### 5. Dynamic Content Handling
+### 5. 动态内容处理
 
 ```javascript
-// Manually trigger translation after loading dynamic content
+// 在动态加载内容后手动触发翻译
 const loadContent = () => {
   loadDynamicContent();
-  tranzy.translatePage('.dynamic-content'); // Can specify elements to translate, defaults to body if not provided
+  tranzy.translatePage('.dynamic-content'); // 可以指定要翻译的元素，不传则默认翻译body
 };
 ```
 
-## Advanced Features
+## 高级功能
 
-### 1. Built-in Translation API
+### 1. 内置翻译API
 
-Besides the core multi-language features, Tranzy also integrates Microsoft Translator API, providing the following functions:
+除了核心的多语言功能外，Tranzy 还内置了微软翻译API，提供以下功能：
 
 ```javascript
 import { translateText, detectLang, getSupportedLangs, getBrowserLang } from 'tranzy';
 
-// Translate text
+// 翻译文本
 const result = await translateText(['Hello world'], 'zh-Hans', 'en');
 console.log(result); // ['你好世界']
 
-// Detect language
+// 检测语言
 const langResult = await detectLang('Hello world');
 console.log(langResult); // [{ language: 'en', score: 1.0, isTranslationSupported: true, isTransliterationSupported: true }]
 
-// Get supported languages list
+// 获取支持的语言列表
 const langs = await getSupportedLangs('zh-Hans');
 console.log(langs); // { en: { name: '英语', nativeName: 'English', dir: 'ltr' }, ... }
 
-// Get browser language code from supported languages
+// 获取浏览器语言对应的支持语言代码
 const browserLang = await getBrowserLang();
-console.log(browserLang); // 'zh-Hans' or 'en' etc.
+console.log(browserLang); // 'zh-Hans' 或 'en' 等
 ```
 
-### 2. Custom Translation Function
+### 2. 自定义翻译函数
 
 ```javascript
-// ES6 mode
+// ES6模式
 import Tranzy from 'tranzy';
 const tranzy = new Tranzy({
   toLang: 'zh-Hans',
-  // Use custom translation function
+  // 使用自定义翻译函数
   translateFn: async (texts, toLang, fromLang) => {
-    // Implement custom translation logic
+    // 实现自定义翻译逻辑
     return texts.map(text => `[${toLang}] ${text}`);
   }
 });
 ```
 
-## Author
+## 作者
 
 Fts Cloud <ftsuperb@vip.qq.com>
 
-## License
+## 许可证
 
 MIT
 
-## Repository
+## 仓库
 
 https://github.com/FtsCloud/Tranzy
 
-## Copyright
+## 版权
 
 Copyright (c) 2023-present Fts Cloud
