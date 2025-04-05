@@ -1,8 +1,8 @@
-# Tranzy v1.0.8
+# Tranzy.js v1.0.8
 
 English | [简体中文](https://github.com/FtsCloud/Tranzy/blob/main/README.md)
 
-Tranzy is a powerful multi-language solution for web pages, allowing developers to easily add multi-language support to their websites. It provides core features such as automatic translation, manual translation dictionary, DOM mutation observation, and more, while also integrating Microsoft Translator API as an optional translation service.
+Tranzy.js is a professional web internationalization solution, allowing developers to easily add multi-language support to their websites. It provides core features such as automatic translation, manual translation dictionary, DOM mutation observation, and more, while also integrating Microsoft Translator API as an optional translation service.
 
 ## Core Advantages
 
