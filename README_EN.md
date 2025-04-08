@@ -1,8 +1,10 @@
 # Tranzy.js v1.0.8
 
-English | [简体中文](https://github.com/FtsCloud/Tranzy/blob/main/README.md)
+[简体中文] | (https://github.com/FtsCloud/Tranzy/blob/main/README.md)English
 
 Tranzy.js is a professional web internationalization solution, allowing developers to easily add multi-language support to their websites. It provides core features such as automatic translation, manual translation dictionary, DOM mutation observation, and more, while also integrating Microsoft Translator API as an optional translation service.
+
+Website: https://www.tranzy.top/
 
 ## Core Advantages
 
@@ -272,4 +274,4 @@ https://github.com/FtsCloud/Tranzy
 
 ## Copyright
 
-Copyright (c) 2023-present Fts Cloud
+Copyright (c) 2025-present Fts Cloud
