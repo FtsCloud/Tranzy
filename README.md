@@ -1,6 +1,6 @@
 # Tranzy.js v1.0.8
 
-简体中文 | [English](https://github.com/FtsCloud/Tranzy/blob/main/README_EN.md)
+简体中文 | [English](https://github.com/FtsCloud/Tranzy/blob/main/README_EN.md) | [Español](https://github.com/FtsCloud/Tranzy/blob/main/README_ES.md) | [日本語](https://github.com/FtsCloud/Tranzy/blob/main/README_JA.md) | [한국어](https://github.com/FtsCloud/Tranzy/blob/main/README_KO.md) | [Русский](https://github.com/FtsCloud/Tranzy/blob/main/README_RU.md) | [Français](https://github.com/FtsCloud/Tranzy/blob/main/README_FR.md) | [Deutsch](https://github.com/FtsCloud/Tranzy/blob/main/README_DE.md)
 
 Tranzy.js 是一个专业的网页国际化解决方案，让开发者能够轻松地为网站添加多语言支持。它提供了自动翻译、手动翻译词典、DOM变化监听等核心功能，同时内置了微软翻译API作为可选的翻译服务。
 
