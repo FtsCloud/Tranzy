@@ -1,0 +1,18 @@
+# Tranzy.js Website Robots.txt
+User-agent: *
+Allow: /
+Allow: /pages/
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+# 禁止访问某些资源
+Disallow: /js/language-switcher.js
+Disallow: /js/sidebar-toggle.js
+Disallow: /*.json$
+
+# 站点地图
+Sitemap: https://www.tranzy.top/sitemap.xml
+
+# 爬虫访问延迟（秒）
+Crawl-delay: 10 
