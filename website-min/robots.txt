@@ -15,4 +15,4 @@ Disallow: /*.json$
 Sitemap: https://www.tranzy.top/sitemap.xml
 
 # 爬虫访问延迟（秒）
-Crawl-delay: 10 
+Crawl-delay: 1
