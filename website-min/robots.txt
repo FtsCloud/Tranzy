@@ -1,13 +1,4 @@
-# Tranzy.js Website Robots.txt
 User-agent: *
-Allow: /
-Allow: /pages/
-Allow: /images/
-Allow: /css/
-Allow: /js/
+Allow: *
 
-# 站点地图
 Sitemap: https://www.tranzy.top/sitemap.xml
-
-# 爬虫访问延迟（秒）
-Crawl-delay: 1
