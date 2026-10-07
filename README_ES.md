@@ -234,7 +234,7 @@ console.log(result); // ['Hola mundo']
 
 // Detección de idioma
 const langResult = await detectLang('Hello world');
-console.log(langResult); // [{ language: 'en', score: 1.0, isTranslationSupported: true, isTransliterationSupported: true }]
+console.log(langResult); // [{ language: 'en', score: 1.0 }]
 
 // Obtención de lista de idiomas soportados
 const langs = await getSupportedLangs('es');

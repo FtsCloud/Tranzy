@@ -234,7 +234,7 @@ console.log(result); // ['Привет, мир']
 
 // Определение языка
 const langResult = await detectLang('Hello world');
-console.log(langResult); // [{ language: 'en', score: 1.0, isTranslationSupported: true, isTransliterationSupported: true }]
+console.log(langResult); // [{ language: 'en', score: 1.0 }]
 
 // Получение списка поддерживаемых языков
 const langs = await getSupportedLangs('ru');

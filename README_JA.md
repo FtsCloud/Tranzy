@@ -234,7 +234,7 @@ console.log(result); // ['こんにちは、世界']
 
 // 言語の検出
 const langResult = await detectLang('Hello world');
-console.log(langResult); // [{ language: 'en', score: 1.0, isTranslationSupported: true, isTransliterationSupported: true }]
+console.log(langResult); // [{ language: 'en', score: 1.0 }]
 
 // サポートされている言語のリストを取得
 const langs = await getSupportedLangs('ja');

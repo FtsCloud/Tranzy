@@ -234,7 +234,7 @@ console.log(result); // ['안녕하세요, 세계']
 
 // 언어 감지
 const langResult = await detectLang('Hello world');
-console.log(langResult); // [{ language: 'en', score: 1.0, isTranslationSupported: true, isTransliterationSupported: true }]
+console.log(langResult); // [{ language: 'en', score: 1.0 }]
 
 // 지원되는 언어 목록 가져오기
 const langs = await getSupportedLangs('ko');

@@ -234,7 +234,7 @@ console.log(result); // ['你好世界']
 
 // 检测语言
 const langResult = await detectLang('Hello world');
-console.log(langResult); // [{ language: 'en', score: 1.0, isTranslationSupported: true, isTransliterationSupported: true }]
+console.log(langResult); // [{ language: 'en', score: 1.0 }]
 
 // 获取支持的语言列表
 const langs = await getSupportedLangs('zh-Hans');

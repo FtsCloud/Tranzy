@@ -204,108 +204,8 @@ class TranslationCache {
 }
 
 /**
- * 从sessionStorage加载认证token
- * @returns {{token: string|null, timestamp: number}} - token和获取时间戳
- */
-function loadTokenFromSession() {
-  try {
-    const tokenData = sessionStorage.getItem('tranzy_auth_token');
-    if (tokenData) {
-      const {
-        token,
-        timestamp
-      } = JSON.parse(tokenData);
-      const now = Date.now();
-      // 如果token未过期，则使用缓存的token
-      if (token && (now - timestamp) < 10 * 60 * 1000) {
-        return {
-          token,
-          timestamp
-        };
-      }
-      // token已过期，清除缓存
-      clearTokenFromSession();
-    }
-  } catch (error) {
-    console.error('Tranzy: Failed to load token from session / 从session加载token失败', error);
-    clearTokenFromSession();
-  }
-  return {
-    token: null,
-    timestamp: 0
-  };
-}
-
-/**
- * 保存认证token到sessionStorage
- * @param {string} token - 认证token
- * @param {number} timestamp - 获取时间戳
- */
-function saveTokenToSession(token, timestamp) {
-  try {
-    sessionStorage.setItem('tranzy_auth_token', JSON.stringify({
-      token,
-      timestamp
-    }));
-  } catch (error) {
-    console.error('Tranzy: Failed to save token to session / 保存token到session失败', error);
-  }
-}
-
-/**
- * 清除sessionStorage中的认证token
- */
-function clearTokenFromSession() {
-  try {
-    sessionStorage.removeItem('tranzy_auth_token');
-  } catch (error) {
-    console.error('Tranzy: Failed to clear token from session / 清除session中的token失败', error);
-  }
-}
-
-/**
- * 获取微软翻译API的认证token
- * 优先使用缓存的token，如果过期则重新获取
- * @returns {Promise<string>} - 认证token
- */
-async function getAuthToken() {
-  const now = Date.now();
-  const {
-    token,
-    timestamp
-  } = loadTokenFromSession();
-
-  // 如果token获取时间小于10分钟，则直接返回
-  if (token && (now - timestamp) < 10 * 60 * 1000) {
-    return token;
-  }
-
-  try {
-    const response = await fetch('https://edge.microsoft.com/translate/auth', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-
-    if (!response.ok) {
-      console.error(`Tranzy: Failed to get Microsoft Translator authorization / 获取微软翻译授权失败: ${response.status} ${response.statusText}`);
-      return null;
-    }
-
-    const newToken = await response.text();
-    saveTokenToSession(newToken, now);
-
-    return newToken;
-  } catch (error) {
-    console.error('Tranzy: Failed to get Microsoft Translator authorization / 获取微软翻译授权失败', error);
-    clearTokenFromSession();
-    throw error;
-  }
-}
-
-/**
  * 调用微软翻译API进行翻译
+ * 使用 Edge 免鉴权翻译端点，无需获取授权令牌
  * @param {string[]} texts - 需要翻译的文本数组
  * @param {string} toLang - 目标语言代码
  * @param {string} [fromLang=''] - 源语言代码
@@ -321,23 +221,16 @@ export async function translateText(texts, toLang = navigator.language, fromLang
       return [];
     }
 
-    // 获取认证令牌
-    const token = await getAuthToken();
+    // 构建URL，只在设置了fromLang时添加from参数（不传则由服务端自动识别源语言）
+    const url = `https://edge.microsoft.com/translate/translatetext?${fromLang ? `from=${fromLang}&` : ''}to=${toLang}`;
 
-    // 构建URL，只在设置了fromLang时添加from参数
-    const url = `https://api.cognitive.microsofttranslator.com/translate?${fromLang ? `from=${fromLang}&` : ''}to=${toLang}&api-version=3.0`
-
-    // 构建请求数据
-    const data = filteredTexts.map(text => ({Text: text}));
-
-    // 发送请求
+    // 发送请求，请求体为纯文本数组，无需Authorization头
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(filteredTexts)
     });
 
     if (!response.ok) {
@@ -356,8 +249,9 @@ export async function translateText(texts, toLang = navigator.language, fromLang
 
 /**
  * 检测文本的语言
+ * 借助翻译接口返回的 detectedLanguage 字段实现检测，无需授权令牌
  * @param {string|string[]} texts - 需要检测语言的文本或文本数组
- * @returns {Promise<Array<{language: string, score: number, isTranslationSupported: boolean, isTransliterationSupported: boolean}>>} - 语言检测结果数组
+ * @returns {Promise<Array<{language: string, score: number}>>} - 语言检测结果数组
  */
 export async function detectLang(texts) {
   try {
@@ -372,20 +266,13 @@ export async function detectLang(texts) {
       return [];
     }
 
-    // 获取认证令牌
-    const token = await getAuthToken();
-
-    // 构建请求数据
-    const data = filteredTexts.map(text => ({Text: text}));
-
-    // 发送请求
-    const response = await fetch('https://api.cognitive.microsofttranslator.com/detect?api-version=3.0', {
+    // 不传from参数，由服务端自动识别源语言；目标语言固定为en
+    const response = await fetch('https://edge.microsoft.com/translate/translatetext?to=en', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(filteredTexts)
     });
 
     if (!response.ok) {
@@ -393,8 +280,12 @@ export async function detectLang(texts) {
       return []; // 返回空数组
     }
 
-    // 处理响应
-    return await response.json();
+    // 处理响应，只保留语言与置信度
+    const result = await response.json();
+    return result.map(item => ({
+      language: item.detectedLanguage?.language,
+      score: item.detectedLanguage?.score
+    }));
   } catch (error) {
     console.error('Tranzy: Language detection failed / 语言检测失败', error);
     throw error;
@@ -445,31 +336,27 @@ export async function getSupportedLangs(displayLang = '') {
  * 注意：返回的语言代码遵循BCP 47规范
  */
 export async function getBrowserLang() {
+  // 获取浏览器语言
+  const browserLang = navigator.language || 'en';
+
   try {
-    // 获取浏览器语言
-    const browserLang = navigator.language;
-
-    // 获取认证令牌
-    const token = await getAuthToken();
-
-    // 发送请求，翻译空字符串
-    const response = await fetch(`https://api.cognitive.microsofttranslator.com/translate?to=${browserLang}&api-version=3.0`, {
+    // 翻译空字符串，由服务端返回归一化后的语言代码，无需授权令牌
+    const response = await fetch(`https://edge.microsoft.com/translate/translatetext?to=${browserLang}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify([{Text: ''}])
+      body: JSON.stringify([''])
     });
 
     if (!response.ok) {
       console.error(`Tranzy: Failed to get browser language / 获取浏览器语言失败: ${response.status} ${response.statusText}`);
-      return navigator.language || 'en'; // 返回浏览器语言或默认英语
+      return browserLang; // 返回浏览器语言
     }
 
     // 处理响应，获取支持的语言代码
     const result = await response.json();
-    return result[0].translations[0].to;
+    return result[0]?.translations?.[0]?.to || browserLang;
   } catch (error) {
     console.error('Tranzy: Failed to get browser language / 获取浏览器语言失败', error);
     throw error;
